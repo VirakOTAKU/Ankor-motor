@@ -1040,7 +1040,7 @@ function clearCart() {
 }
 
 // Updated handleOrder - Show Login Modal if Not Logged In
-function handleOrder(id) {
+async function handleOrder(id) {
   const currentUser = getCurrentUser();
   if (!currentUser) {
     alert('Please login to order!');
@@ -1048,8 +1048,23 @@ function handleOrder(id) {
     authModal.show();
     return;
   }
-  const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
-  const car = savedCars.find((c) => c.id === id);
+  let car = null;
+  try {
+    const resp = await fetch('/api/cars');
+    if (resp.ok) {
+      const cars = await resp.json();
+      car = cars.find((c) => c.id === id);
+      if (Array.isArray(cars) && cars.length) {
+        localStorage.setItem(CARS_KEY, JSON.stringify(cars));
+      }
+    }
+  } catch (e) {
+    // Ignore and fall back to localStorage
+  }
+  if (!car) {
+    const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+    car = savedCars.find((c) => c.id === id);
+  }
   if (car) {
     // Prevent duplicate
     if (cart.some((item) => item.id === car.id)) {
@@ -1068,7 +1083,7 @@ function handleOrder(id) {
       window.location.href = 'index.html';
     }
   } else {
-    alert('Car not found.');
+    alert('Car not found. Please refresh the page and try again.');
   }
 }
 
@@ -1164,6 +1179,35 @@ function renderOrderForm() {
   document.getElementById('order-total').textContent = total;
 }
 
+// Payment Method Toggle
+function initPaymentFields() {
+  const methodSelect = document.getElementById('order-payment-method');
+  if (!methodSelect) return;
+  const cardFields = document.getElementById('card-payment-fields');
+  const mobileFields = document.getElementById('mobile-payment-fields');
+  const cardInputs = cardFields ? Array.from(cardFields.querySelectorAll('input')) : [];
+  const mobileInputs = mobileFields ? Array.from(mobileFields.querySelectorAll('input')) : [];
+
+  const setRequired = (inputs, required) => {
+    inputs.forEach((input) => {
+      input.required = required;
+    });
+  };
+
+  const updatePaymentVisibility = () => {
+    const method = methodSelect.value;
+    if (cardFields) cardFields.style.display = method === 'card' ? '' : 'none';
+    if (mobileFields) mobileFields.style.display = method === 'aba' ? '' : 'none';
+    setRequired(cardInputs, method === 'card');
+    setRequired(mobileInputs, method === 'aba');
+  };
+
+  methodSelect.addEventListener('change', updatePaymentVisibility);
+  updatePaymentVisibility();
+}
+
+document.addEventListener('DOMContentLoaded', initPaymentFields);
+
 // Contact Form Handler - Save Messages to localStorage
 document.getElementById('contactForm').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -1232,6 +1276,12 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     email: document.getElementById('order-email').value,
     address: document.getElementById('order-address').value,
     total: cart.reduce((sum, item) => sum + item.price, 0),
+    paymentMethod: document.getElementById('order-payment-method')?.value || 'cash',
+    cardNumber: (document.getElementById('order-card-number')?.value || '').replace(/\s+/g, ''),
+    cardExpiry: document.getElementById('order-card-expiry')?.value || '',
+    cardCvc: document.getElementById('order-card-cvc')?.value || '',
+    cardName: document.getElementById('order-card-name')?.value || '',
+    mobileNumber: document.getElementById('order-mobile-number')?.value || '',
   };
   if (cart.length === 0) {
     alert('Your cart is empty!');
@@ -1241,11 +1291,20 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     console.log('Generating PDF...');
     await generateOrderPDF(formData, currentUser, cart); // Added await
     // Save order (non-file data)
+    const cardLast4 = formData.cardNumber ? formData.cardNumber.slice(-4) : '';
+    const paymentSummary =
+      formData.paymentMethod === 'card'
+        ? `Card ****${cardLast4}`
+        : formData.paymentMethod === 'aba'
+        ? `ABA ${formData.mobileNumber}`
+        : 'Cash on delivery';
+
     const order = {
       user: currentUser.username,
       car: cart.map((c) => c.name).join(', '),
       total: formData.total,
       date: new Date().toLocaleDateString(),
+      payment: paymentSummary,
     };
     orders.push(order);
     localStorage.setItem('angkor_auto_orders', JSON.stringify(orders));
@@ -1262,6 +1321,31 @@ function validateOrderForm(data) {
   if (!data.fullName || !data.phone || !data.email || !data.address) {
     alert('Please fill all required fields.');
     return false;
+  }
+  const paymentMethod = data.paymentMethod || 'cash';
+  if (paymentMethod === 'card') {
+    const cardNumber = (data.cardNumber || '').replace(/\s+/g, '');
+    if (cardNumber.length < 12) {
+      alert('Please enter a valid card number.');
+      return false;
+    }
+    if (!data.cardExpiry || !/^\d{2}\/\d{2}$/.test(data.cardExpiry)) {
+      alert('Please enter a valid expiry date (MM/YY).');
+      return false;
+    }
+    if (!data.cardCvc || data.cardCvc.length < 3) {
+      alert('Please enter a valid CVC.');
+      return false;
+    }
+    if (!data.cardName) {
+      alert('Please enter the name on card.');
+      return false;
+    }
+  } else if (paymentMethod === 'aba') {
+    if (!data.mobileNumber || data.mobileNumber.length < 8) {
+      alert('Please enter a valid ABA phone number.');
+      return false;
+    }
   }
   const idCardFile = document.getElementById('order-id-card').files[0];
   const licenseFile = document.getElementById('order-drivers-license').files[0];

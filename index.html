@@ -1328,6 +1328,70 @@
                   />
                 </div>
               </div>
+              <!-- Payment Section -->
+              <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                  <label for="order-payment-method" class="form-label">Payment Method</label>
+                  <select class="form-select site-input" id="order-payment-method" required>
+                    <option value="card">Card</option>
+                    <option value="aba">ABA / Bank Transfer</option>
+                    <option value="cash">Cash on Delivery</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2" id="mobile-payment-fields" style="display: none">
+                  <label for="order-mobile-number" class="form-label">ABA Phone Number</label>
+                  <input
+                    type="tel"
+                    class="form-control site-input"
+                    id="order-mobile-number"
+                    placeholder="e.g. 012345678"
+                  />
+                </div>
+              </div>
+              <div class="row mb-3" id="card-payment-fields">
+                <div class="col-md-6 mb-2">
+                  <label for="order-card-number" class="form-label">Card Number</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="order-card-number"
+                    placeholder="1234 5678 9012 3456"
+                    inputmode="numeric"
+                    maxlength="19"
+                  />
+                </div>
+                <div class="col-md-3 mb-2">
+                  <label for="order-card-expiry" class="form-label">Expiry (MM/YY)</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="order-card-expiry"
+                    placeholder="MM/YY"
+                    inputmode="numeric"
+                    maxlength="5"
+                  />
+                </div>
+                <div class="col-md-3 mb-2">
+                  <label for="order-card-cvc" class="form-label">CVC</label>
+                  <input
+                    type="password"
+                    class="form-control site-input"
+                    id="order-card-cvc"
+                    placeholder="CVC"
+                    inputmode="numeric"
+                    maxlength="4"
+                  />
+                </div>
+                <div class="col-md-12 mb-2">
+                  <label for="order-card-name" class="form-label">Name on Card</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="order-card-name"
+                    placeholder="Full name"
+                  />
+                </div>
+              </div>
               <div class="order-summary bg-dark p-3 rounded mb-3">
                 <h6><strong>Order Summary</strong></h6>
                 <ul id="order-summary-items" class="list-unstyled small"></ul>
