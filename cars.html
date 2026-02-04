@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Angkor Auto - All Cars</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="main.css" />
+    <!-- Link to your existing CSS -->
+  </head>
+  <body>
+    <!-- Simple Header with Back Button (No Navbar) -->
+    <header class="bg-dark text-white p-3">
+      <div class="container d-flex justify-content-between align-items-center">
+        <button id="back-to-home" class="btn btn-outline-light">
+          <i class="bi bi-arrow-left"></i> Back to Home
+        </button>
+        <h4 class="mb-0">All Cars</h4>
+        <div></div>
+        <!-- Spacer for alignment -->
+      </div>
+    </header>
+
+    <!-- All Cars Section -->
+    <section class="cars-section">
+      <div class="container">
+        <div class="car-grid" id="car-grid">
+          <!-- Cars will be populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Car Detail Modal (Shared) -->
+    <div
+      class="modal fade"
+      id="carDetailModal"
+      tabindex="-1"
+      aria-labelledby="carDetailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="carDetailModalLabel">
+              <i class="bi bi-car-front"></i> Car Details
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <img
+                  id="detail-image"
+                  src=""
+                  alt=""
+                  class="img-fluid rounded"
+                  style="height: 300px; object-fit: cover"
+                />
+              </div>
+              <div class="col-md-6">
+                <h3 id="detail-name"></h3>
+                <p><strong>Model:</strong> <span id="detail-model"></span></p>
+                <p><strong>Brand:</strong> <span id="detail-brand"></span></p>
+                <p><strong>Category:</strong> <span id="detail-category"></span></p>
+                <p><strong>Body Type:</strong> <span id="detail-body-type"></span></p>
+                <p><strong>Transmission:</strong> <span id="detail-transmission"></span></p>
+                <p><strong>Condition:</strong> <span id="detail-condition"></span></p>
+                <p><strong>Year:</strong> <span id="detail-year"></span></p>
+                <p><strong>Mileage:</strong> <span id="detail-mileage"></span> km</p>
+                <p><strong>Color:</strong> <span id="detail-color"></span></p>
+                <p><strong>Price:</strong> $<span id="detail-price"></span></p>
+                <p><strong>Description:</strong> <span id="detail-description"></span></p>
+                <button class="btn btn-primary w-100 mt-3" id="detail-order-btn">
+                  <i class="bi bi-cart-plus"></i> Order Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+    <!-- Assumes main.js has renderCars, showCarDetail, handleOrder, etc. -->
+    <script>
+      // Page-Specific Init for cars.html
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCartFromStorage(); // Load cart count
+        renderCars(); // Populate grid
+      });
+
+      // Load Cart from localStorage on Init
+      function loadCartFromStorage() {
+        const savedCart = JSON.parse(localStorage.getItem('angkor_auto_cart')) || [];
+        cart = savedCart;
+        const countElement = document.getElementById('cart-count');
+        if (countElement) {
+          countElement.textContent = cart.length;
+        }
+      }
+
+      // Back Button Click Handler
+      document.getElementById('back-to-home').addEventListener('click', () => {
+        window.location.href = 'index.html'; // Redirect to homepage
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1288 @@
+// main.js
+let cart = [];
+let orders = []; // Simple orders history
+
+// User Management
+const USERS_KEY = 'angkor_auto_users';
+const CURRENT_USER_KEY = 'angkor_auto_current_user';
+const CARS_KEY = 'angkor_auto_cars';
+
+function initUsers() {
+  let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+  // Pre-create admin if not exists
+  if (!users.find((u) => u.username === 'admin')) {
+    users.push({
+      username: 'admin',
+      email: 'admin@angkorauto.com',
+      password: 'admin', // In production, hash passwords!
+      role: 'admin',
+      avatar: null,
+    });
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+  return users;
+}
+
+function getCurrentUser() {
+  return JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
+}
+
+function setCurrentUser(user) {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+}
+
+function updateUserInStorage(updatedUser) {
+  let users = initUsers();
+  const oldUsername = getCurrentUser().username;
+  const index = users.findIndex((u) => u.username === oldUsername);
+  if (index !== -1) {
+    users[index] = updatedUser;
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    setCurrentUser(updatedUser);
+  }
+}
+
+function logout() {
+  localStorage.removeItem(CURRENT_USER_KEY);
+  updateProfileDisplay();
+}
+
+// Update profile display
+function updateProfileDisplay() {
+  // No text to update since span is removed
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    // Optionally change icon if needed, e.g., to a different user icon
+    document.querySelector('.profile i').className = 'bi bi-person-check-fill';
+  } else {
+    document.querySelector('.profile i').className = 'bi bi-person';
+  }
+}
+
+// Show/Hide Password Functionality
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.toggle-password').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      const targetId = toggle.dataset.target;
+      const passwordInput = document.getElementById(targetId);
+      const icon = toggle.querySelector('i');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      }
+    });
+  });
+
+  // Profile Click Handler
+  document.getElementById('profile-trigger').addEventListener('click', () => {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      // Show profile modal
+      showProfileModal(currentUser);
+    } else {
+      // Show auth modal
+      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+      authModal.show();
+    }
+  });
+
+  // Add Car Form Handler
+  document.getElementById('addCarForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    addCar();
+  });
+
+  // Image Preview on File Select for Car
+  document.getElementById('new-car-image').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('preview-img').src = e.target.result;
+        document.getElementById('image-preview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Avatar Preview on File Select for Profile
+  document.getElementById('edit-avatar').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('preview-avatar').src = e.target.result;
+        document.getElementById('avatar-preview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Edit Profile Form Handler
+  document.getElementById('editProfileForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const currentUser = getCurrentUser();
+    const updatedUser = {
+      username: document.getElementById('edit-username').value,
+      email: document.getElementById('edit-email').value,
+      password: document.getElementById('edit-password').value || currentUser.password, // Keep old if blank
+      role: currentUser.role, // Cannot change role
+    };
+    const avatarFile = document.getElementById('edit-avatar').files[0];
+    if (avatarFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        updatedUser.avatar = e.target.result;
+        updateUserInStorage(updatedUser);
+        alert('Profile updated successfully!');
+        showProfileView();
+      };
+      reader.readAsDataURL(avatarFile);
+    } else {
+      updateUserInStorage(updatedUser);
+      alert('Profile updated successfully!');
+      showProfileView();
+    }
+  });
+
+  // Cancel Edit
+  document.getElementById('cancel-edit-btn').addEventListener('click', showProfileView);
+
+  // Edit User Form Handler (Admin)
+  document.getElementById('editUserForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('edit-user-username').value;
+    const email = document.getElementById('edit-user-email').value;
+    const role = document.getElementById('edit-user-role').value;
+    let users = initUsers();
+    const userIndex = users.findIndex((u) => u.username === username);
+    if (userIndex !== -1) {
+      users[userIndex].email = email;
+      users[userIndex].role = role;
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+      renderUsersTable();
+      alert('User updated successfully!');
+    }
+  });
+
+  // Edit Car Form Handler - Updated Mileage Parsing
+  document.getElementById('editCarForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById('edit-car-id').value);
+    const name = document.getElementById('edit-car-name').value;
+    const brand = document.getElementById('edit-car-brand').value;
+    const model = document.getElementById('edit-car-model').value;
+    const category = document.getElementById('edit-car-category').value;
+    const year = parseInt(document.getElementById('edit-car-year').value);
+    const bodyType = document.getElementById('edit-car-body-type').value;
+    const transmission = document.getElementById('edit-car-transmission').value;
+    const condition = document.getElementById('edit-car-condition').value;
+    const mileageText = document.getElementById('edit-car-mileage').value.replace(/,/g, '');
+    const mileage = parseInt(mileageText) || 0;
+    const color = document.getElementById('edit-car-color').value;
+    const price = parseInt(document.getElementById('edit-car-price').value);
+    const description = document.getElementById('edit-car-description').value;
+    const imageFile = document.getElementById('edit-car-image').files[0];
+    const imageUrl = document.getElementById('edit-car-image-url').value;
+    
+    // Get current car image from DB first
+    fetch('/api/cars').then(r => r.json()).then(cars => {
+      const currentCar = cars.find(c => c.id === id);
+      let imageToSend = currentCar?.image || 'images/placeholder.png';
+      
+      // Priority: URL > File > Current image
+      if (imageUrl) {
+        imageToSend = imageUrl;
+        sendUpdateRequest(id, { name, brand, model, category, year, bodyType, transmission, condition, mileage, color, price, description, image: imageToSend });
+      } else if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imageToSend = e.target.result;
+          sendUpdateRequest(id, { name, brand, model, category, year, bodyType, transmission, condition, mileage, color, price, description, image: imageToSend });
+        };
+        reader.readAsDataURL(imageFile);
+      } else {
+        sendUpdateRequest(id, { name, brand, model, category, year, bodyType, transmission, condition, mileage, color, price, description, image: imageToSend });
+      }
+    }).catch(() => {
+      alert('Error loading car data. Please refresh and try again.');
+    });
+    
+    function sendUpdateRequest(carId, carData) {
+      fetch(`/api/cars/${carId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(carData)
+      })
+      .then(r => r.json())
+      .then(data => {
+        renderCarsTable();
+        renderCars();
+        renderCarsCrudTable();
+        document.getElementById('edit-car-image-url').value = '';
+        bootstrap.Modal.getInstance(document.getElementById('editCarModal')).hide();
+        alert('Car updated successfully!');
+      })
+      .catch(err => {
+        console.error('Update error:', err);
+        alert('Failed to update car. Check console for details.');
+      });
+    }
+  });
+});
+
+// Show Profile View (toggle from edit)
+function showProfileView() {
+  document.getElementById('profile-view').style.display = 'block';
+  document.getElementById('profile-edit').style.display = 'none';
+  const currentUser = getCurrentUser();
+  document.getElementById('profile-username').textContent = currentUser.username;
+  document.getElementById('profile-email').textContent = currentUser.email || 'No email provided';
+  document.getElementById('user-avatar').src =
+    currentUser.avatar ||
+    'https://via.placeholder.com/150?text=' + currentUser.username.charAt(0).toUpperCase();
+}
+
+// Show Profile Edit
+function showProfileEdit() {
+  const currentUser = getCurrentUser();
+  document.getElementById('edit-username').value = currentUser.username;
+  document.getElementById('edit-email').value = currentUser.email || '';
+  document.getElementById('edit-password').value = '';
+  document.getElementById('edit-avatar').value = '';
+  document.getElementById('avatar-preview').style.display = 'none';
+  document.getElementById('profile-view').style.display = 'none';
+  document.getElementById('profile-edit').style.display = 'block';
+}
+
+// Show Profile Modal
+function showProfileModal(user) {
+  // Close dashboard modal to prevent stacking issues
+  const dashboardModal = bootstrap.Modal.getInstance(
+    document.getElementById('adminDashboardModal')
+  );
+  if (dashboardModal) {
+    dashboardModal.hide();
+  }
+
+  showProfileView();
+  document.getElementById('profile-username').textContent = user.username;
+  document.getElementById('profile-email').textContent = user.email || 'No email provided';
+  document.getElementById('user-avatar').src =
+    user.avatar || 'https://via.placeholder.com/150?text=' + user.username.charAt(0).toUpperCase();
+
+  // Edit Profile Button
+  document.getElementById('edit-profile-btn').onclick = showProfileEdit;
+
+  // My Orders Button - Updated to Show Styled Modal
+  document.getElementById('my-orders-btn').onclick = () => {
+    renderMyOrdersTable();
+    const ordersModal = new bootstrap.Modal(document.getElementById('myOrdersModal'));
+    ordersModal.show();
+  };
+
+  // Dashboard Button (Admin Only)
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  if (user.role === 'admin') {
+    dashboardBtn.style.display = 'block';
+    dashboardBtn.onclick = () => {
+      bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+      showAdminDashboard();
+    };
+  } else {
+    dashboardBtn.style.display = 'none';
+  }
+
+  // Logout from Profile
+  document.getElementById('logout-from-profile').onclick = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      logout();
+      bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+      alert('Logged out successfully!');
+    }
+  };
+
+  const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+  profileModal.show();
+}
+
+// Update showAdminDashboard (Call Render Messages)
+function showAdminDashboard() {
+  renderUsersTable();
+  renderOrdersTable();
+  renderCarsTable();
+  renderMessagesTable();
+  renderCarsCrudTable(); // Render the new Car CRUD tab
+
+  const adminModal = new bootstrap.Modal(document.getElementById('adminDashboardModal'));
+  adminModal.show();
+}
+
+// Show Car Detail Modal - Fixed Null Reference
+// Show Car Detail — fetch from API
+async function showCarDetail(id) {
+  try {
+    const resp = await fetch('/api/cars');
+    const cars = await resp.json();
+    const car = cars.find((c) => c.id === id);
+    
+    if (car) {
+      document.getElementById('detail-image').src = car.image;
+      document.getElementById('detail-image').alt = car.name;
+      document.getElementById('detail-name').textContent = car.name;
+      const detailModel = document.getElementById('detail-model');
+      if (detailModel) detailModel.textContent = car.model || 'N/A';
+      const detailBrand = document.getElementById('detail-brand');
+      if (detailBrand) detailBrand.textContent = car.brand || 'N/A';
+      const detailCategory = document.getElementById('detail-category');
+      if (detailCategory) detailCategory.textContent = car.category || 'N/A';
+      const detailBodyType = document.getElementById('detail-body-type');
+      if (detailBodyType) detailBodyType.textContent = car.bodyType || 'N/A';
+      const detailTransmission = document.getElementById('detail-transmission');
+      if (detailTransmission) detailTransmission.textContent = car.transmission || 'N/A';
+      document.getElementById('detail-condition').textContent = car.condition;
+      document.getElementById('detail-year').textContent = car.year;
+      document.getElementById('detail-mileage').textContent = car.mileage;
+      const detailColor = document.getElementById('detail-color');
+      if (detailColor) detailColor.textContent = car.color || 'N/A';
+      document.getElementById('detail-price').textContent = car.price;
+      document.getElementById('detail-description').textContent = car.description || 'No description available.';
+      const detailModal = new bootstrap.Modal(document.getElementById('carDetailModal'));
+      detailModal.show();
+
+      // Order button in detail modal
+      document.getElementById('detail-order-btn').onclick = () => {
+        handleOrder(car.id);
+        detailModal.hide();
+      };
+    }
+  } catch (err) {
+    console.error('Error fetching car details:', err);
+    alert('Failed to load car details.');
+  }
+}
+
+// Render Users Table
+function renderUsersTable() {
+  const users = initUsers();
+  const tbody = document.getElementById('users-table-body');
+  tbody.innerHTML = users
+    .map(
+      (user) => `
+    <tr>
+      <td>${user.username}</td>
+      <td>${user.email || 'N/A'}</td>
+      <td><span class="badge bg-${user.role === 'admin' ? 'danger' : 'secondary'}">${user.role}</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" onclick="editUser('${user.username}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.username}')">Delete</button>
+      </td>
+    </tr>
+  `
+    )
+    .join('');
+}
+
+// Render Messages Table (Admin Dashboard)
+function renderMessagesTable() {
+  const messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+  const tbody = document.getElementById('messages-table-body');
+  tbody.innerHTML = messages
+    .map(
+      (msg, index) => `
+    <tr>
+      <td>${msg.user}</td>
+      <td>${msg.email}</td>
+      <td>${msg.message.substring(0, 100)}...</td>
+      <td>${msg.date}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteMessage(${index});">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </td>
+    </tr>
+  `
+    )
+    .join('');
+}
+
+// Delete Message Function (Admin)
+function deleteMessage(index) {
+  if (confirm('Delete this message? This cannot be undone.')) {
+    let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+    messages.splice(index, 1); // Remove from array
+    localStorage.setItem('angkor_auto_messages', JSON.stringify(messages)); // Sync
+    renderMessagesTable(); // Re-render
+    alert('Message deleted successfully!');
+  }
+}
+
+// Edit User (Admin)
+function editUser(username) {
+  // Close dashboard modal to prevent stacking issues
+  const dashboardModal = bootstrap.Modal.getInstance(
+    document.getElementById('adminDashboardModal')
+  );
+  if (dashboardModal) {
+    dashboardModal.hide();
+  }
+
+  const users = initUsers();
+  const user = users.find((u) => u.username === username);
+  if (user) {
+    document.getElementById('edit-user-username').value = user.username;
+    document.getElementById('edit-user-email').value = user.email || '';
+    document.getElementById('edit-user-role').value = user.role;
+    const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    editUserModal.show();
+  }
+}
+
+// Updated Render Orders Table (Admin Dashboard)
+function renderOrdersTable() {
+  const tbody = document.getElementById('orders-table-body');
+  tbody.innerHTML = orders
+    .map(
+      (order, index) => `
+    <tr>
+      <td>${order.user || 'N/A'}</td>
+      <td>${order.car}</td>
+      <td>$${order.total}</td>
+      <td>${order.date}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteOrder(${index}, false);">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </td>
+    </tr>
+  `
+    )
+    .join('');
+}
+
+// Updated Render My Orders Table (Profile - Fixed Delete Button onclick)
+function renderMyOrdersTable() {
+  const currentUser = getCurrentUser();
+  const userOrders = orders.filter((order) => order.user === currentUser.username);
+  const tbody = document.getElementById('orders-table-body-profile');
+  const noOrdersMsg = document.getElementById('no-orders-msg');
+
+  if (userOrders.length === 0) {
+    tbody.innerHTML = '';
+    noOrdersMsg.style.display = 'block';
+  } else {
+    noOrdersMsg.style.display = 'none';
+    tbody.innerHTML = userOrders
+      .map((order, localIndex) => {
+        // Find global index safely (avoids template literal escaping issues)
+        const globalIndex = orders.findIndex(
+          (o) => o.date === order.date && o.car === order.car && o.total === order.total
+        );
+        return `
+      <tr>
+        <td>${order.date}</td>
+        <td>${order.car}</td>
+        <td>$${order.total}</td>
+        <td><span class="badge bg-success">Confirmed</span></td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="deleteOrder(${globalIndex}, true);">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    `;
+      })
+      .join('');
+  }
+}
+
+// Render Cars Table - Fixed Column Alignment
+function renderCarsTable() {
+  const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  const tbody = document.getElementById('cars-table-body');
+  tbody.innerHTML = savedCars
+    .map(
+      (car) => `
+    <tr>
+      <td>${car.name}</td>
+      <td>${car.brand || 'N/A'}</td> <!-- New column -->
+      <td>${car.model}</td>
+      <td>${car.category}</td>
+      <td>${car.year}</td>
+      <td>${car.mileage}</td>
+      <td>$${car.price}</td>
+      <td><img src="${car.image}" alt="${car.name}" style="width: 50px; height: 30px; object-fit: cover;"></td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" onclick="editCar(${car.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCar(${car.id})">Delete</button>
+      </td>
+    </tr>
+  `
+    )
+    .join('');
+}
+
+// Render Cars CRUD Tab Table — fetches from API
+async function renderCarsCrudTable() {
+  try {
+    const resp = await fetch('/api/cars');
+    const cars = await resp.json();
+    const tbody = document.getElementById('cars-crud-table-body');
+    tbody.innerHTML = cars
+      .map(
+        (car) => `
+      <tr>
+        <td>${car.name}</td>
+        <td>${car.brand || 'N/A'}</td>
+        <td>${car.model}</td>
+        <td>$${car.price}</td>
+        <td>${car.year}</td>
+        <td>${car.condition}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-1" onclick="editCar(${car.id})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteCar(${car.id})">Delete</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+  } catch (err) {
+    console.error('Error loading cars for CRUD table:', err);
+    document.getElementById('cars-crud-table-body').innerHTML = '<tr><td colspan="7" class="text-danger">Failed to load cars</td></tr>';
+  }
+}
+
+// Render Cars - Updated Order Button to Add to Cart & Redirect
+// Render Cars — fetch from backend API if available, otherwise fall back to localStorage
+async function renderCarsAsync() {
+  const grid = document.getElementById('car-grid');
+  let cars = [];
+  try {
+    const resp = await fetch('/api/cars');
+    if (resp.ok) {
+      cars = await resp.json();
+    } else {
+      throw new Error('API not available');
+    }
+  } catch (e) {
+    cars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  }
+
+  if (!cars || cars.length === 0) {
+    grid.innerHTML = '<p class="text-center text-muted col-12">No cars available.</p>';
+    return;
+  }
+
+  grid.innerHTML = cars
+    .map(
+      (car) => `
+  <div class="car-card" onclick="showCarDetail(${car.id}); return false;">
+    <img src="${car.image || 'images/placeholder.png'}" alt="${car.name}">
+    <div class="car-card-content">
+      <h3>${car.year} ${car.name}</h3>
+      <p>Condition: ${car.condition || 'N/A'}</p>
+      <p>Mileage: ${car.mileage || 0} km</p>
+      <p>Color: ${car.color || 'N/A'}</p>
+      <p>Price: $${car.price || '0'}</p>
+      <button class="order-btn w-100" onclick="handleOrder(${car.id}); event.stopPropagation(); return false;">Order</button>
+    </div>
+  </div>
+`
+    )
+    .join('');
+}
+
+// Edit Car (Admin)
+// Edit Car — fetch from API
+async function editCar(id) {
+  // Close dashboard modal to prevent stacking issues
+  const dashboardModal = bootstrap.Modal.getInstance(
+    document.getElementById('adminDashboardModal')
+  );
+  if (dashboardModal) {
+    dashboardModal.hide();
+  }
+
+  try {
+    const resp = await fetch('/api/cars');
+    const cars = await resp.json();
+    const car = cars.find((c) => c.id === id);
+    if (car) {
+      document.getElementById('edit-car-id').value = car.id;
+      document.getElementById('edit-car-name').value = car.name;
+      document.getElementById('edit-car-brand').value = car.brand || '';
+      document.getElementById('edit-car-model').value = car.model;
+      document.getElementById('edit-car-category').value = car.category;
+      document.getElementById('edit-car-year').value = car.year;
+      document.getElementById('edit-car-body-type').value = car.bodyType;
+      document.getElementById('edit-car-transmission').value = car.transmission;
+      document.getElementById('edit-car-condition').value = car.condition;
+      document.getElementById('edit-car-mileage').value = car.mileage;
+      document.getElementById('edit-car-color').value = car.color || '#000000';
+      document.getElementById('edit-car-price').value = car.price;
+      document.getElementById('edit-car-description').value = car.description;
+      const editCarModal = new bootstrap.Modal(document.getElementById('editCarModal'));
+      editCarModal.show();
+    }
+  } catch (err) {
+    console.error('Error loading car for edit:', err);
+    alert('Failed to load car data.');
+  }
+}
+
+// Delete User
+function deleteUser(username) {
+  const currentUser = getCurrentUser();
+  if (username === currentUser.username) {
+    alert('Cannot delete yourself!');
+    return;
+  }
+  if (confirm(`Delete user ${username}?`)) {
+    let users = initUsers();
+    users = users.filter((u) => u.username !== username);
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    renderUsersTable();
+  }
+}
+
+// Delete Order Function (Shared for Profile & Admin)
+function deleteOrder(orderIndex, isProfile = false) {
+  if (confirm('Delete this order? This cannot be undone.')) {
+    orders.splice(orderIndex, 1); // Remove from array
+    localStorage.setItem('angkor_auto_orders', JSON.stringify(orders)); // Sync to storage
+    if (isProfile) {
+      renderMyOrdersTable(); // Re-render profile modal
+    } else {
+      renderOrdersTable(); // Re-render admin table
+    }
+    alert('Order deleted successfully!');
+  }
+}
+
+// Add Car — sends to backend API
+function addCar() {
+  const name = document.getElementById('new-car-name').value;
+  const brand = document.getElementById('new-car-brand').value;
+  const model = document.getElementById('new-car-model').value;
+  const category = document.getElementById('new-car-category').value;
+  const year = parseInt(document.getElementById('new-car-year').value);
+  const bodyType = document.getElementById('new-car-body-type').value;
+  const transmission = document.getElementById('new-car-transmission').value;
+  const condition = document.getElementById('new-car-condition').value;
+  const mileageText = document.getElementById('new-car-mileage').value.replace(/,/g, '');
+  const mileage = parseInt(mileageText) || 0;
+  const color = document.getElementById('new-car-color').value;
+  const price = parseInt(document.getElementById('new-car-price').value);
+  const description = document.getElementById('new-car-description').value;
+  const imageFile = document.getElementById('new-car-image').files[0];
+  const imageUrl = document.getElementById('new-car-image-url').value;
+  
+  if (!name || !brand || !model || !category || !year || !bodyType || !transmission || !condition || !mileage || !color || !price || !description) {
+    alert('Please fill all required fields.');
+    return;
+  }
+  
+  if (!imageFile && !imageUrl) {
+    alert('Please provide either an image file or an image URL.');
+    return;
+  }
+  
+  // Use URL if provided, otherwise use file
+  if (imageUrl) {
+    const newCar = {
+      name, brand, model, category, year, bodyType, transmission, condition, mileage, color, price, description,
+      image: imageUrl,
+    };
+    submitNewCar(newCar);
+  } else if (imageFile) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newCar = {
+        name, brand, model, category, year, bodyType, transmission, condition, mileage, color, price, description,
+        image: e.target.result,
+      };
+      submitNewCar(newCar);
+    };
+    reader.readAsDataURL(imageFile);
+  }
+}
+
+function submitNewCar(carData) {
+  fetch('/api/cars', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(carData)
+  })
+  .then(r => r.json())
+  .then(data => {
+    renderCarsTable();
+    renderCars();
+    renderCarsCrudTable();
+    document.getElementById('addCarForm').reset();
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('new-car-image-url').value = '';
+    alert('Car added successfully for Cambodia market!');
+  })
+  .catch(err => {
+    console.error('Add error:', err);
+    alert('Failed to add car. Check console for details.');
+  });
+}
+
+// Delete Car — calls backend API
+function deleteCar(id) {
+  if (confirm('Delete this car?')) {
+    fetch(`/api/cars/${id}`, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(data => {
+        renderCarsTable();
+        renderCars();
+        alert('Car deleted successfully!');
+      })
+      .catch(err => {
+        console.error('Delete error:', err);
+        alert('Failed to delete car. Check console for details.');
+      });
+  }
+}
+
+// Login Handler
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const users = initUsers();
+  const user = users.find((u) => u.username === username && u.password === password);
+  if (user) {
+    setCurrentUser(user);
+    updateProfileDisplay();
+    bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+    alert('Login successful! Role: ' + user.role);
+  } else {
+    alert('Invalid credentials!');
+  }
+});
+
+// Register Handler
+document.getElementById('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = document.getElementById('registerUsername').value;
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  const role = document.getElementById('registerRole').value;
+  let users = initUsers();
+  if (users.find((u) => u.username === username)) {
+    alert('Username already exists!');
+    return;
+  }
+  const newUser = { username, email, password, role, avatar: null };
+  users.push(newUser);
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  alert('Registration successful! You can now login.');
+  // Switch to login tab
+  const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+  loginTab.show();
+});
+
+// Render Cars (wrapper) — calls async renderer
+function renderCars() {
+  renderCarsAsync();
+}
+
+// Filter Cars by Category and Brand
+let currentFilters = { category: '', brand: '' };
+
+function applyFilters() {
+  const category = document.getElementById('filter-category').value;
+  const brand = document.getElementById('filter-brand').value;
+  currentFilters = { category, brand };
+  renderFilteredCars();
+}
+
+function clearFilters() {
+  document.getElementById('filter-category').value = '';
+  document.getElementById('filter-brand').value = '';
+  currentFilters = { category: '', brand: '' };
+  renderFilteredCars();
+}
+
+// Render Filtered Cars
+function renderFilteredCars() {
+  const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  let filteredCars = savedCars.filter((car) => {
+    const matchesCategory = !currentFilters.category || car.category === currentFilters.category;
+    const matchesBrand =
+      !currentFilters.brand || car.name.toLowerCase().includes(currentFilters.brand.toLowerCase());
+    return matchesCategory && matchesBrand;
+  });
+  const grid = document.getElementById('car-grid');
+  if (filteredCars.length === 0) {
+    grid.innerHTML =
+      '<p class="text-center text-muted col-12">No cars match the selected filters. Try adjusting your search.</p>';
+  } else {
+    grid.innerHTML = filteredCars
+      .map(
+        (car) => `
+      <div class="car-card" onclick="showCarDetail(${car.id})">
+        <img src="${car.image}" alt="${car.name}">
+        <div class="car-card-content">
+          <h3>${car.year} ${car.name}</h3>
+          <p>Condition: ${car.condition}</p>
+          <p>Mileage: ${car.mileage} km</p>
+          <p>Color: ${car.color}</p>
+          <p>Price: $${car.price}</p>
+          <button class="order-btn w-100" onclick="showCarDetail(${car.id}); event.stopPropagation();">Order</button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+  }
+  // Update initial render to use filtered
+  if (Object.values(currentFilters).every((f) => !f)) {
+    renderCars(); // Full render if no filters
+  }
+}
+
+// Add Clear Cart Listener (Call on DOM Ready) - Full Integration in main.js
+document.addEventListener('DOMContentLoaded', () => {
+  // Existing init code (e.g., profile, forms, etc.) goes here...
+
+  // Clear Cart Button Listener
+  const clearBtn = document.getElementById('clear-cart-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearCart);
+  }
+
+  // ... (rest of existing DOMContentLoaded code, e.g., other listeners)
+});
+
+// Clear Cart Function - Empties Cart & Saves to localStorage
+function clearCart() {
+  if (confirm('Clear all items from cart? This cannot be undone.')) {
+    cart = [];
+    localStorage.setItem('angkor_auto_cart', JSON.stringify(cart)); // Sync to storage
+    const countElement = document.getElementById('cart-count');
+    if (countElement) {
+      countElement.textContent = 0;
+    }
+    renderCart(); // Re-render empty cart
+    alert('Cart cleared!');
+  }
+}
+
+// Updated handleOrder - Show Login Modal if Not Logged In
+function handleOrder(id) {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    alert('Please login to order!');
+    const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+    authModal.show();
+    return;
+  }
+  const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  const car = savedCars.find((c) => c.id === id);
+  if (car) {
+    // Prevent duplicate
+    if (cart.some((item) => item.id === car.id)) {
+      alert(`${car.name} is already in cart!`);
+      return;
+    }
+    cart.push(car);
+    localStorage.setItem('angkor_auto_cart', JSON.stringify(cart)); // Save
+    const countElement = document.getElementById('cart-count');
+    if (countElement) {
+      countElement.textContent = cart.length;
+    }
+    alert(`${car.name} added to cart! Count: ${cart.length}`);
+    // Optional: Redirect if on cars.html
+    if (window.location.pathname.includes('cars.html')) {
+      window.location.href = 'index.html';
+    }
+  } else {
+    alert('Car not found.');
+  }
+}
+
+// Cart Modal - Updated with Remove Functionality
+function renderCart() {
+  const items = document.getElementById('cart-items');
+  const summaryItems = document.getElementById('cart-summary-items');
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  if (cart.length === 0) {
+    items.innerHTML = '<p class="text-center text-muted">Your cart is empty</p>';
+    summaryItems.innerHTML = '';
+  } else {
+    items.innerHTML = cart
+      .map(
+        (item, index) => `
+      <div class="card mb-2">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div class="flex-grow-1">
+            <h6>${item.name} (${item.year})</h6>
+            <p class="mb-0 text-muted">$${item.price}</p>
+          </div>
+          <button class="btn btn-danger btn-sm ms-2" onclick="removeFromCart(${index})">
+            <i class="bi bi-trash"></i> Remove
+          </button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+
+    summaryItems.innerHTML = cart
+      .map((item) => `<li>${item.name} (${item.year}) - $${item.price}</li>`)
+      .join('');
+  }
+
+  document.getElementById('cart-total').textContent = total;
+  document.getElementById('cart-count').textContent = cart.length;
+}
+
+function removeFromCart(index) {
+  try {
+    if (index < 0 || index >= cart.length) {
+      alert('Invalid item. Please refresh cart.');
+      return;
+    }
+    if (confirm('Remove this car from cart?')) {
+      cart.splice(index, 1); // Remove from array
+      localStorage.setItem('angkor_auto_cart', JSON.stringify(cart)); // Sync to storage
+      renderCart(); // Re-render
+      alert('Car removed from cart.');
+    }
+  } catch (error) {
+    console.error('Remove error:', error);
+    alert('Error removing item. Please try again.');
+  }
+}
+
+document.querySelector('.shop-icon').addEventListener('click', () => {
+  renderCart();
+  const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+  cartModal.show();
+});
+
+// Cart Modal - Updated Checkout Button
+document.getElementById('checkout').addEventListener('click', () => {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    alert('Please login to checkout!');
+    const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+    authModal.show();
+    bootstrap.Modal.getInstance(document.getElementById('cartModal')).hide();
+    return;
+  }
+  if (cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
+  // Open order form modal
+  renderOrderForm();
+  const orderFormModal = new bootstrap.Modal(document.getElementById('orderFormModal'));
+  orderFormModal.show();
+  bootstrap.Modal.getInstance(document.getElementById('cartModal')).hide();
+});
+
+// Render Order Summary in Form
+function renderOrderForm() {
+  const items = document.getElementById('order-summary-items');
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  items.innerHTML = cart
+    .map((item) => `<li>${item.name} (${item.year}) - $${item.price}</li>`)
+    .join('');
+  document.getElementById('order-total').textContent = total;
+}
+
+// Contact Form Handler - Save Messages to localStorage
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('contact-name').value;
+  const email = document.getElementById('contact-email').value;
+  const message = document.getElementById('contact-message').value;
+  if (name && email && message) {
+    // Save message to localStorage
+    const newMessage = {
+      id: Date.now(),
+      user: name,
+      email: email,
+      message: message,
+      date: new Date().toLocaleDateString(),
+    };
+    let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+    messages.push(newMessage);
+    localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
+
+    alert(`Thank you, ${name}! Your message has been sent to admin. We'll reply soon.`);
+    document.getElementById('contactForm').reset();
+  } else {
+    alert('Please fill all fields.');
+  }
+});
+
+// Order Form Submit - Await PDF Generation
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  // Added async
+  e.preventDefault();
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    alert('Please login to place an order!');
+    return;
+  }
+  const formData = {
+    fullName: document.getElementById('order-full-name').value,
+    phone: document.getElementById('order-phone').value,
+    email: document.getElementById('order-email').value,
+    address: document.getElementById('order-address').value,
+    total: cart.reduce((sum, item) => sum + item.price, 0),
+  };
+  if (cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
+  if (validateOrderForm(formData)) {
+    console.log('Generating PDF...');
+    await generateOrderPDF(formData, currentUser, cart); // Added await
+    // Save order (non-file data)
+    const order = {
+      user: currentUser.username,
+      car: cart.map((c) => c.name).join(', '),
+      total: formData.total,
+      date: new Date().toLocaleDateString(),
+    };
+    orders.push(order);
+    localStorage.setItem('angkor_auto_orders', JSON.stringify(orders));
+    alert('Order confirmed! PDF generated.');
+    cart = [];
+    document.getElementById('cart-count').textContent = 0;
+    bootstrap.Modal.getInstance(document.getElementById('orderFormModal')).hide();
+    document.getElementById('orderForm').reset();
+  }
+});
+
+// Simple Form Validation - No Changes Needed
+function validateOrderForm(data) {
+  if (!data.fullName || !data.phone || !data.email || !data.address) {
+    alert('Please fill all required fields.');
+    return false;
+  }
+  const idCardFile = document.getElementById('order-id-card').files[0];
+  const licenseFile = document.getElementById('order-drivers-license').files[0];
+  const familyBookFile = document.getElementById('order-family-book').files[0];
+  if (!idCardFile || !licenseFile || !familyBookFile) {
+    alert('Please upload all required documents.');
+    return false;
+  }
+  return true;
+}
+
+// Generate PDF - Fixed Async Handling with Await
+async function generateOrderPDF(formData, user, cartItems) {
+  if (typeof window.jspdf === 'undefined') {
+    alert('jsPDF library not loaded. Check CDN in HTML.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Header (unchanged)
+  doc.setFillColor(0, 0, 0);
+  doc.rect(0, 0, 210, 25, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Angkor Auto', 20, 15);
+  doc.setTextColor(255, 0, 0);
+  doc.setFontSize(12);
+  doc.text('Order Confirmation', 20, 22);
+
+  // Customer Details (unchanged)
+  let y = 35;
+  doc.setFillColor(20, 20, 20);
+  doc.rect(15, y - 5, 180, 35, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Customer Information', 20, y);
+  y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Name: ${formData.fullName}`, 20, y);
+  y += 6;
+  doc.text(`Email: ${formData.email}`, 20, y);
+  y += 6;
+  doc.text(`Phone: ${formData.phone}`, 20, y);
+  y += 6;
+  doc.text(`Address: ${formData.address}`, 20, y);
+
+  // Items - Fixed y-calc for dynamic height (unchanged)
+  y += 15;
+  const itemHeight = cartItems.length * 7 + 25;
+  doc.setFillColor(20, 20, 20);
+  doc.rect(15, y - 5, 180, itemHeight, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Order Items', 20, y);
+  y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  let itemY = y;
+  cartItems.forEach((item, index) => {
+    doc.text(`${index + 1}. ${item.name} (${item.year})`, 20, itemY);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`$${item.price}`, 160, itemY, { align: 'right' });
+    doc.setTextColor(255, 255, 255);
+    itemY += 7;
+  });
+  y = itemY + 5;
+
+  // Total (unchanged)
+  doc.setTextColor(255, 0, 0);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(`Total: $${formData.total}`, 20, y);
+  doc.setLineWidth(1);
+  doc.setDrawColor(255, 0, 0);
+  doc.line(20, y + 2, 190, y + 2);
+
+  // Documents (unchanged setup)
+  y += 20;
+  doc.setFillColor(20, 20, 20);
+  doc.rect(15, y - 5, 180, 60, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Uploaded Documents', 20, y);
+  y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+
+  const idCardFile = document.getElementById('order-id-card').files[0];
+  const licenseFile = document.getElementById('order-drivers-license').files[0];
+  const familyBookFile = document.getElementById('order-family-book').files[0];
+
+  if (!idCardFile || !licenseFile || !familyBookFile) {
+    doc.setTextColor(255, 0, 0);
+    doc.text('Error: Documents not uploaded. Please try again.', 20, y);
+    doc.save(`AngkorAuto-Order-${Date.now()}.pdf`);
+    return;
+  }
+
+  const imagePromises = [];
+  let imageY = y;
+
+  // Sequential embedding with error handling (unchanged)
+  const embedImages = async () => {
+    try {
+      if (idCardFile) {
+        const base64Id = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(idCardFile);
+        });
+        doc.addImage(base64Id, 'JPEG', 20, imageY, 45, 30);
+        doc.text('ID Card', 20, imageY + 32);
+      }
+
+      if (licenseFile) {
+        const base64License = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(licenseFile);
+        });
+        doc.addImage(base64License, 'JPEG', 75, imageY, 45, 30);
+        doc.text("Driver's License", 75, imageY + 32);
+      }
+
+      if (familyBookFile) {
+        const base64Family = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(familyBookFile);
+        });
+        doc.addImage(base64Family, 'JPEG', 130, imageY, 45, 30);
+        doc.text('Family Book', 130, imageY + 32);
+      }
+
+      // Footer
+      doc.setFillColor(0, 0, 0);
+      doc.rect(0, 280, 210, 10, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.text('Thank you for choosing Angkor Auto! | Phnom Penh, Cambodia', 20, 287);
+
+      doc.save(`AngkorAuto-Order-${Date.now()}.pdf`);
+      console.log('PDF generated successfully with images.');
+    } catch (error) {
+      console.error('PDF Image Error:', error);
+      doc.setTextColor(255, 0, 0);
+      doc.text('Error embedding images. PDF saved without images.', 20, y);
+      doc.save(`AngkorAuto-Order-${Date.now()}-NoImages.pdf`);
+    }
+  };
+
+  // Fixed: Await the async function in caller
+  embedImages().catch((error) => {
+    console.error('PDF Generation Failed:', error);
+    doc.save(`AngkorAuto-Order-${Date.now()}-Error.pdf`);
+  });
+}
+
+// ADD THIS FUNCTION (before // Initialize)
+function initSampleCars() {
+  let savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  if (savedCars.length === 0) {
+    const sampleCars = [
+      {
+        id: 1,
+        name: 'Toyota Camry',
+        brand: 'Toyota',
+        model: 'LE',
+        category: 'Sedan',
+        year: 2023,
+        bodyType: 'Sedan',
+        transmission: 'Automatic',
+        condition: 'New',
+        mileage: 0,
+        color: '#ffffff',
+        price: 28000,
+        description: 'Reliable family sedan.',
+        image: 'https://via.placeholder.com/400x250/ffffff/000000?text=Toyota+Camry',
+      },
+      {
+        id: 2,
+        name: 'Honda CR-V',
+        brand: 'Honda',
+        model: 'EX-L',
+        category: 'SUV',
+        year: 2024,
+        bodyType: 'SUV',
+        transmission: 'Automatic',
+        condition: 'New',
+        mileage: 0,
+        color: '#000000',
+        price: 35000,
+        description: 'Spacious SUV.',
+        image: 'https://via.placeholder.com/400x250/000000/ffffff?text=Honda+CR-V',
+      },
+    ];
+    localStorage.setItem(CARS_KEY, JSON.stringify(sampleCars));
+    console.log('Sample cars added to grid.');
+  }
+}
+
+// Initialize - Fixed with Cart Load
+initUsers();
+updateProfileDisplay();
+orders = JSON.parse(localStorage.getItem('angkor_auto_orders')) || [];
+loadCartFromStorage(); // Loads cart & updates count
+renderCars(); // Renders cars

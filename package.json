@@ -1,0 +1,15 @@
+{
+  "name": "angkor-auto-backend",
+  "version": "1.0.0",
+  "description": "Simple Express backend serving SQLite car data for Angkor Auto",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed_db.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  }
+}

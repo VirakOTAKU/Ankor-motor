@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Angkor Auto - Find Your Dream Car</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <!-- Video Background for Hero Section -->
+    <video autoplay muted loop id="bg-video">
+      <source src="./videos/TYSN0694000H.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <ul class="nav-list">
+        <li>
+          <a href="#home"><i class="bi bi-house"></i> Home</a>
+        </li>
+        <li>
+          <a href="cars.html"><i class="bi bi-car-front"></i> Cars</a>
+        </li>
+        <li>
+          <a href="#about"><i class="bi bi-info-circle"></i> About</a>
+        </li>
+        <li>
+          <a href="#contact"><i class="bi bi-envelope"></i> Contact</a>
+        </li>
+        <li class="shop-icon"><i class="bi bi-cart"></i> <span id="cart-count">0</span></li>
+        <li class="profile" id="profile-trigger">
+          <i class="bi bi-person"></i>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Auth Modal -->
+    <div
+      class="modal fade"
+      id="authModal"
+      tabindex="-1"
+      aria-labelledby="authModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <ul class="nav nav-tabs" id="authTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  id="login-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#login"
+                  type="button"
+                >
+                  <i class="bi bi-box-arrow-in-right"></i> Login
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="register-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#register"
+                  type="button"
+                >
+                  <i class="bi bi-person-plus"></i> Register
+                </button>
+              </li>
+            </ul>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="tab-content" id="authTabContent">
+              <!-- Login Form -->
+              <div class="tab-pane fade show active" id="login" role="tabpanel">
+                <form id="loginForm">
+                  <div class="mb-3">
+                    <label for="loginUsername" class="form-label">
+                      <i class="bi bi-person"></i> Username
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-dark text-white">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control site-input"
+                        id="loginUsername"
+                        placeholder="Enter username"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="loginPassword" class="form-label">
+                      <i class="bi bi-lock"></i> Password
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-dark text-white">
+                        <i class="bi bi-lock"></i>
+                      </span>
+                      <input
+                        type="password"
+                        class="form-control site-input"
+                        id="loginPassword"
+                        placeholder="Enter password"
+                        required
+                      />
+                      <span
+                        class="input-group-text bg-dark text-white toggle-password"
+                        data-target="loginPassword"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn site-btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                  </button>
+                </form>
+              </div>
+              <!-- Register Form -->
+              <div class="tab-pane fade" id="register" role="tabpanel">
+                <form id="registerForm">
+                  <div class="mb-3">
+                    <label for="registerUsername" class="form-label">
+                      <i class="bi bi-person"></i> Username
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-dark text-white">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control site-input"
+                        id="registerUsername"
+                        placeholder="Enter username"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="registerEmail" class="form-label">
+                      <i class="bi bi-envelope"></i> Email
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-dark text-white">
+                        <i class="bi bi-envelope"></i>
+                      </span>
+                      <input
+                        type="email"
+                        class="form-control site-input"
+                        id="registerEmail"
+                        placeholder="Enter email"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="registerPassword" class="form-label">
+                      <i class="bi bi-lock"></i> Password
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-dark text-white">
+                        <i class="bi bi-lock"></i>
+                      </span>
+                      <input
+                        type="password"
+                        class="form-control site-input"
+                        id="registerPassword"
+                        placeholder="Enter password"
+                        required
+                      />
+                      <span
+                        class="input-group-text bg-dark text-white toggle-password"
+                        data-target="registerPassword"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="registerRole" class="form-label">
+                      <i class="bi bi-shield-check"></i> Role
+                    </label>
+                    <select class="form-select site-input" id="registerRole">
+                      <option value="customer">Customer</option>
+                      <option value="admin">Admin (for testing)</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn site-btn-primary w-100">
+                    <i class="bi bi-person-plus"></i> Register
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Modal (for logged-in users) -->
+    <div
+      class="modal fade"
+      id="profileModal"
+      tabindex="-1"
+      aria-labelledby="profileModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="profileModalLabel">
+              <i class="bi bi-person-circle"></i> User Profile
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div id="profile-view" class="text-center">
+              <img
+                src="https://via.placeholder.com/150?text=User"
+                alt="User Avatar"
+                class="rounded-circle mb-3"
+                id="user-avatar"
+                style="width: 150px; height: 150px; object-fit: cover"
+              />
+              <h4 id="profile-username"></h4>
+              <p class="mb-3" id="profile-email"></p>
+              <button class="btn btn-outline-light mb-2 w-100" id="my-orders-btn">
+                <i class="bi bi-list-ul"></i> My Orders
+              </button>
+              <button
+                class="btn btn-outline-light mb-3 w-100 dashboard-btn"
+                id="dashboard-btn"
+                style="display: none"
+              >
+                <i class="bi bi-speedometer2"></i> Dashboard
+              </button>
+              <button class="btn btn-primary mb-2 w-100" id="edit-profile-btn">
+                <i class="bi bi-pencil"></i> Edit Profile
+              </button>
+              <button class="btn site-btn-primary w-100" id="logout-from-profile">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </button>
+            </div>
+            <div id="profile-edit" style="display: none">
+              <form id="editProfileForm">
+                <div class="mb-3">
+                  <label for="edit-username" class="form-label">
+                    <i class="bi bi-person"></i> Username
+                  </label>
+                  <input type="text" class="form-control site-input" id="edit-username" required />
+                </div>
+                <div class="mb-3">
+                  <label for="edit-email" class="form-label">
+                    <i class="bi bi-envelope"></i> Email
+                  </label>
+                  <input type="email" class="form-control site-input" id="edit-email" required />
+                </div>
+                <div class="mb-3">
+                  <label for="edit-avatar" class="form-label">
+                    <i class="bi bi-image"></i> Profile Image (optional)
+                  </label>
+                  <input
+                    type="file"
+                    class="form-control site-input"
+                    id="edit-avatar"
+                    accept="image/*"
+                  />
+                  <div id="avatar-preview" class="mt-2" style="display: none">
+                    <img
+                      id="preview-avatar"
+                      src=""
+                      alt="Preview"
+                      style="
+                        max-width: 100px;
+                        max-height: 100px;
+                        border-radius: 50%;
+                        border: 1px solid #555;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="edit-password" class="form-label">
+                    <i class="bi bi-lock"></i> New Password (leave blank to keep current)
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-dark text-white">
+                      <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" class="form-control site-input" id="edit-password" />
+                    <span
+                      class="input-group-text bg-dark text-white toggle-password"
+                      data-target="edit-password"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </span>
+                  </div>
+                </div>
+                <button type="submit" class="btn site-btn-primary w-100 mb-2">
+                  <i class="bi bi-check"></i> Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary w-100" id="cancel-edit-btn">
+                  <i class="bi bi-x"></i> Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Orders Modal -->
+    <div
+      class="modal fade"
+      id="myOrdersModal"
+      tabindex="-1"
+      aria-labelledby="myOrdersModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="myOrdersModalLabel">
+              <i class="bi bi-list-ul"></i> My Orders
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Order Date</th>
+                    <th>Cars</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body-profile">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+            <p id="no-orders-msg" class="text-center text-muted" style="display: none">
+              No orders yet. Start shopping!
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div
+      class="modal fade"
+      id="adminDashboardModal"
+      tabindex="-1"
+      aria-labelledby="adminDashboardModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="adminDashboardModalLabel">
+              <i class="bi bi-speedometer2"></i> Admin Dashboard
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <ul class="nav nav-tabs border-bottom" id="dashboardTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link active"
+                  id="users-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#users"
+                  type="button"
+                >
+                  <i class="bi bi-people"></i> Users
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="orders-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#orders"
+                  type="button"
+                >
+                  <i class="bi bi-cart-check"></i> Orders
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="cars-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#cars"
+                  type="button"
+                >
+                  <i class="bi bi-car-front"></i> Manage Cars
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="car-crud-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#car-crud"
+                  type="button"
+                >
+                  <i class="bi bi-pencil-square"></i> Edit Cars
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link"
+                  id="messages-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#messages"
+                  type="button"
+                >
+                  <i class="bi bi-envelope"></i> Messages
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content" id="dashboardTabContent">
+              <!-- Users Tab -->
+              <div class="tab-pane fade show active" id="users" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Orders Tab -->
+              <div class="tab-pane fade" id="orders" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Cars</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Messages Tab -->
+              <div class="tab-pane fade" id="messages" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="messages-table-body">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Manage Cars Tab (Add) -->
+              <div class="tab-pane fade" id="cars" role="tabpanel">
+                <div class="mb-3">
+                  <h6>Add New Car (Cambodia Market)</h6>
+                  <form id="addCarForm">
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-name" class="form-label">Car Name</label>
+                        <input
+                          type="text"
+                          class="form-control site-input"
+                          id="new-car-name"
+                          placeholder="e.g., Toyota Camry"
+                          required
+                        />
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-model" class="form-label">Model</label>
+                        <input
+                          type="text"
+                          class="form-control site-input"
+                          id="new-car-model"
+                          placeholder="e.g., Camry"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-brand" class="form-label">Brand</label>
+                        <select class="form-select site-input" id="new-car-brand" required>
+                          <option value="">Select Brand</option>
+                          <option value="Toyota">Toyota</option>
+                          <option value="Honda">Honda</option>
+                          <option value="Ford">Ford</option>
+                          <option value="Hyundai">Hyundai</option>
+                          <option value="Mazda">Mazda</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-category" class="form-label">Category</label>
+                        <select class="form-select site-input" id="new-car-category" required>
+                          <option value="">Select Category</option>
+                          <option value="Sedan">Sedan</option>
+                          <option value="SUV">SUV</option>
+                          <option value="Hatchback">Hatchback</option>
+                          <option value="Coupe">Coupe</option>
+                          <option value="Truck">Truck</option>
+                          <option value="Sports">Sports</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-year" class="form-label">Year</label>
+                        <input
+                          type="number"
+                          class="form-control site-input"
+                          id="new-car-year"
+                          placeholder="e.g., 2023"
+                          min="1900"
+                          max="2026"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-body-type" class="form-label">Body Type</label>
+                        <input
+                          type="text"
+                          class="form-control site-input"
+                          id="new-car-body-type"
+                          placeholder="e.g., Sedan"
+                          required
+                        />
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-transmission" class="form-label">Transmission</label>
+                        <select class="form-select site-input" id="new-car-transmission" required>
+                          <option value="">Select Transmission</option>
+                          <option value="Manual">Manual</option>
+                          <option value="Automatic">Automatic</option>
+                          <option value="CVT">CVT</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-condition" class="form-label">Condition</label>
+                        <select class="form-select site-input" id="new-car-condition" required>
+                          <option value="">Select Condition</option>
+                          <option value="New">New</option>
+                          <option value="Used">Used</option>
+                          <option value="Certified Pre-Owned">Certified Pre-Owned</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-mileage" class="form-label">Mileage (km)</label>
+                        <input
+                          type="text"
+                          class="form-control site-input"
+                          id="new-car-mileage"
+                          placeholder="e.g., 50,000"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-color" class="form-label">Color</label>
+                        <input
+                          type="color"
+                          class="form-control site-input"
+                          id="new-car-color"
+                          value="#000000"
+                          required
+                        />
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-price" class="form-label">Price (USD)</label>
+                        <input
+                          type="number"
+                          class="form-control site-input"
+                          id="new-car-price"
+                          placeholder="e.g., 25000"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-image" class="form-label">Upload Image</label>
+                        <input
+                          type="file"
+                          class="form-control site-input"
+                          id="new-car-image"
+                          accept="image/*"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <label for="new-car-image-url" class="form-label">OR Image URL</label>
+                        <input
+                          type="url"
+                          class="form-control site-input"
+                          id="new-car-image-url"
+                          placeholder="e.g., https://example.com/image.jpg"
+                        />
+                      </div>
+                    </div>
+                    <div class="mb-2">
+                      <label for="new-car-description" class="form-label">Description</label>
+                      <textarea
+                        class="form-control site-input"
+                        id="new-car-description"
+                        rows="3"
+                        placeholder="Enter car description..."
+                      ></textarea>
+                    </div>
+                    <button type="submit" class="btn site-btn-primary">Add Car</button>
+                  </form>
+                  <div id="image-preview" class="mt-2" style="display: none">
+                    <img
+                      id="preview-img"
+                      src=""
+                      alt="Preview"
+                      style="
+                        max-width: 200px;
+                        max-height: 150px;
+                        border-radius: 10px;
+                        border: 1px solid #555;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Category</th>
+                        <th>Year</th>
+                        <th>Mileage (km)</th>
+                        <th>Price (USD)</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cars-table-body">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Car CRUD Tab -->
+              <div class="tab-pane fade" id="car-crud" role="tabpanel">
+                <div class="table-responsive">
+                  <table class="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Price</th>
+                        <th>Year</th>
+                        <th>Condition</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cars-crud-table-body">
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit User Modal (Admin Only) -->
+    <div
+      class="modal fade"
+      id="editUserModal"
+      tabindex="-1"
+      aria-labelledby="editUserModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editUserModalLabel">
+              <i class="bi bi-person-gear"></i> Edit User
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editUserForm">
+              <input type="hidden" id="edit-user-username" />
+              <div class="mb-3">
+                <label for="edit-user-email" class="form-label">
+                  <i class="bi bi-envelope"></i> Email
+                </label>
+                <input type="email" class="form-control site-input" id="edit-user-email" required />
+              </div>
+              <div class="mb-3">
+                <label for="edit-user-role" class="form-label">
+                  <i class="bi bi-shield-check"></i> Role
+                </label>
+                <select class="form-select site-input" id="edit-user-role" required>
+                  <option value="customer">Customer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <button type="submit" class="btn site-btn-primary w-100">
+                <i class="bi bi-check"></i> Update User
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Car Modal (Admin Only) -->
+    <div
+      class="modal fade"
+      id="editCarModal"
+      tabindex="-1"
+      aria-labelledby="editCarModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCarModalLabel">
+              <i class="bi bi-car-front-fill"></i> Edit Car
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editCarForm">
+              <input type="hidden" id="edit-car-id" />
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-name" class="form-label">Car Name</label>
+                  <input type="text" class="form-control site-input" id="edit-car-name" required />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-model" class="form-label">Model</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="edit-car-model"
+                    placeholder="e.g., Camry"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-brand" class="form-label">Brand</label>
+                  <select class="form-select site-input" id="edit-car-brand" required>
+                    <option value="">Select Brand</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Ford">Ford</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="Mazda">Mazda</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-category" class="form-label">Category</label>
+                  <select class="form-select site-input" id="edit-car-category" required>
+                    <option value="">Select Category</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Sports">Sports</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-year" class="form-label">Year</label>
+                  <input
+                    type="number"
+                    class="form-control site-input"
+                    id="edit-car-year"
+                    min="1900"
+                    max="2026"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-body-type" class="form-label">Body Type</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="edit-car-body-type"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-transmission" class="form-label">Transmission</label>
+                  <select class="form-select site-input" id="edit-car-transmission" required>
+                    <option value="">Select Transmission</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="CVT">CVT</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-condition" class="form-label">Condition</label>
+                  <select class="form-select site-input" id="edit-car-condition" required>
+                    <option value="">Select Condition</option>
+                    <option value="New">New</option>
+                    <option value="Used">Used</option>
+                    <option value="Certified Pre-Owned">Certified Pre-Owned</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-mileage" class="form-label">Mileage (km)</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="edit-car-mileage"
+                    placeholder="e.g., 50,000"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-color" class="form-label">Color</label>
+                  <input
+                    type="color"
+                    class="form-control site-input"
+                    id="edit-car-color"
+                    value="#000000"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-price" class="form-label">Price (USD)</label>
+                  <input
+                    type="number"
+                    class="form-control site-input"
+                    id="edit-car-price"
+                    min="0"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-image" class="form-label">Upload New Image (optional)</label>
+                  <input
+                    type="file"
+                    class="form-control site-input"
+                    id="edit-car-image"
+                    accept="image/*"
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label for="edit-car-image-url" class="form-label">OR Image URL (optional)</label>
+                  <input
+                    type="url"
+                    class="form-control site-input"
+                    id="edit-car-image-url"
+                    placeholder="e.g., https://example.com/image.jpg"
+                  />
+                </div>
+              </div>
+              <div class="mb-2">
+                <label for="edit-car-description" class="form-label">Description</label>
+                <textarea
+                  class="form-control site-input"
+                  id="edit-car-description"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn site-btn-primary w-100">
+                <i class="bi bi-check"></i> Update Car
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>Angkor Auto</h1>
+        <p>Find and buy your dream car today!</p>
+      </div>
+    </section>
+
+    <!-- New Cars Section with Filters -->
+    <section class="cars-section" id="cars">
+      <div class="container">
+        <h2>New Cars</h2>
+        <!-- Filters -->
+        <div class="filters mb-4">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label for="filter-category" class="form-label">Category</label>
+              <select class="form-select site-input" id="filter-category">
+                <option value="">All Categories</option>
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Truck">Truck</option>
+                <option value="Sports">Sports</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="filter-brand" class="form-label">Brand</label>
+              <select class="form-select site-input" id="filter-brand">
+                <option value="">All Brands</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Honda">Honda</option>
+                <option value="Ford">Ford</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Mazda">Mazda</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button type="button" class="btn site-btn-primary w-100" onclick="applyFilters()">
+                Apply Filters
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-light w-100 mt-1"
+                onclick="clearFilters()"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="car-grid" id="car-grid">
+          <!-- Cars will be populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Car Detail Modal -->
+    <div
+      class="modal fade"
+      id="carDetailModal"
+      tabindex="-1"
+      aria-labelledby="carDetailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="carDetailModalLabel">
+              <i class="bi bi-car-front"></i> Car Details
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <img
+                  id="detail-image"
+                  src=""
+                  alt=""
+                  class="img-fluid rounded"
+                  style="height: 300px; object-fit: cover"
+                />
+              </div>
+              <div class="col-md-6">
+                <h3 id="detail-name"></h3>
+                <p><strong>Model:</strong> <span id="detail-model"></span></p>
+                <p><strong>Brand:</strong> <span id="detail-brand"></span></p>
+                <p><strong>Category:</strong> <span id="detail-category"></span></p>
+                <p><strong>Body Type:</strong> <span id="detail-body-type"></span></p>
+                <p><strong>Transmission:</strong> <span id="detail-transmission"></span></p>
+                <p><strong>Condition:</strong> <span id="detail-condition"></span></p>
+                <p><strong>Year:</strong> <span id="detail-year"></span></p>
+                <p><strong>Mileage:</strong> <span id="detail-mileage"></span> km</p>
+                <p><strong>Color:</strong> <span id="detail-color"></span></p>
+                <p><strong>Price:</strong> $<span id="detail-price"></span></p>
+                <p><strong>Description:</strong> <span id="detail-description"></span></p>
+                <button class="btn btn-primary w-100 mt-3" id="detail-order-btn">
+                  <i class="bi bi-cart-plus"></i> Order Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h2>About Angkor Auto</h2>
+            <p class="lead">
+              Welcome to Angkor Auto, your trusted partner for premium vehicles in Cambodia. Founded
+              in Phnom Penh, we specialize in new and used cars tailored to the local market,
+              blending global brands with reliable service.
+            </p>
+            <p>
+              Our mission is to make dream cars accessible, offering a wide selection from sedans to
+              SUVs. With a focus on quality inspections and customer satisfaction, we've helped
+              thousands find their perfect ride since 2020.
+            </p>
+            <ul class="list-unstyled">
+              <li><i class="bi bi-check-circle text-success"></i> Certified pre-owned vehicles</li>
+              <li><i class="bi bi-check-circle text-success"></i> Financing options available</li>
+              <li>
+                <i class="bi bi-check-circle text-success"></i> Expert service center in Phnom Penh
+              </li>
+            </ul>
+            <a href="#contact" class="btn site-btn-primary mt-3">Get in Touch</a>
+          </div>
+          <div class="col-md-6">
+            <img
+              src="./images/ChatGPT Image Jan 23, 2026, 02_59_19 PM.png"
+              alt="About Angkor Auto"
+              class="img-fluid rounded shadow"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+      <div class="container">
+        <h2>Contact Us</h2>
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="text-center p-4 bg-dark rounded">
+              <i class="bi bi-geo-alt-fill text-primary fs-1 mb-3"></i>
+              <h5>Visit Us</h5>
+              <p>123 Angkor Street<br />Phnom Penh, Cambodia</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="text-center p-4 bg-dark rounded">
+              <i class="bi bi-telephone-fill text-primary fs-1 mb-3"></i>
+              <h5>Call Us</h5>
+              <p>+855 23 123 456<br />+855 23 789 012</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="text-center p-4 bg-dark rounded">
+              <i class="bi bi-envelope-fill text-primary fs-1 mb-3"></i>
+              <h5>Email Us</h5>
+              <p>info@angkorauto.com<br />sales@angkorauto.com</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-8 mx-auto">
+            <form id="contactForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="contact-name" class="form-label">Name</label>
+                  <input type="text" class="form-control site-input" id="contact-name" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="contact-email" class="form-label">Email</label>
+                  <input type="email" class="form-control site-input" id="contact-email" required />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="contact-message" class="form-label">Message</label>
+                <textarea
+                  class="form-control site-input"
+                  id="contact-message"
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn site-btn-primary">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shopping Cart Modal - Updated with Footer, Remove Buttons & Dark Theme Fit -->
+    <div
+      class="modal fade site-modal"
+      id="cartModal"
+      tabindex="-1"
+      aria-labelledby="cartModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title" id="cartModalLabel">
+              <i class="bi bi-cart"></i> Shopping Cart
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-0">
+            <div id="cart-items" class="p-3">
+              <!-- Items populated by JS with remove buttons -->
+            </div>
+            <div class="order-summary p-3 bg-dark rounded-bottom border-top border-secondary">
+              <h6 class="text-white mb-3"><strong>Order Summary</strong></h6>
+              <ul id="cart-summary-items" class="list-unstyled small text-light mb-3"></ul>
+              <p class="fw-bold text-white mb-0">
+                Total: <span id="cart-total" class="text-danger fs-4">$0</span>
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer bg-dark border-top border-secondary">
+            <button type="button" class="btn site-btn-primary" id="checkout">
+              <i class="bi bi-credit-card"></i> Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Form Modal -->
+    <div
+      class="modal fade"
+      id="orderFormModal"
+      tabindex="-1"
+      aria-labelledby="orderFormModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content site-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="orderFormModalLabel">
+              <i class="bi bi-file-earmark-check"></i> Complete Your Order
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="orderForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="order-full-name" class="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="order-full-name"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="order-phone" class="form-label">Phone Number</label>
+                  <input type="tel" class="form-control site-input" id="order-phone" required />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="order-email" class="form-label">Email</label>
+                  <input type="email" class="form-control site-input" id="order-email" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="order-address" class="form-label">Address</label>
+                  <input
+                    type="text"
+                    class="form-control site-input"
+                    id="order-address"
+                    placeholder="Street, City, Phnom Penh"
+                    required
+                  />
+                </div>
+              </div>
+              <!-- Document Upload Section -->
+              <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                  <label for="order-id-card" class="form-label">ID Card (Upload Image)</label>
+                  <input
+                    type="file"
+                    class="form-control site-input"
+                    id="order-id-card"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label for="order-drivers-license" class="form-label"
+                    >Driver's License (Upload Image)</label
+                  >
+                  <input
+                    type="file"
+                    class="form-control site-input"
+                    id="order-drivers-license"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label for="order-family-book" class="form-label"
+                    >Family Record Book (Upload Image)</label
+                  >
+                  <input
+                    type="file"
+                    class="form-control site-input"
+                    id="order-family-book"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="order-summary bg-dark p-3 rounded mb-3">
+                <h6><strong>Order Summary</strong></h6>
+                <ul id="order-summary-items" class="list-unstyled small"></ul>
+                <p class="fw-bold">Total: $<span id="order-total">0</span></p>
+              </div>
+              <button type="submit" class="btn site-btn-primary w-100">
+                <i class="bi bi-file-earmark-pdf"></i> Generate PDF & Confirm Order
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Load Cart on Homepage Init (After Redirect from cars.html)
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCartFromStorage(); // Load from localStorage & update count
+      });
+
+      // Add loadCartFromStorage Function if Missing in main.js (Inline for index.html)
+      function loadCartFromStorage() {
+        const savedCart = JSON.parse(localStorage.getItem('angkor_auto_cart')) || [];
+        cart = savedCart; // Update global cart array
+        const countElement = document.getElementById('cart-count');
+        if (countElement) {
+          countElement.textContent = cart.length;
+        }
+        console.log('Cart loaded on homepage:', cart.length); // Debug log
+      }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>

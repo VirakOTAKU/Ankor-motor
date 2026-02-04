@@ -1,0 +1,988 @@
+/* main.css */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: white;
+  background: #000;
+  position: relative;
+}
+
+#bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Full viewport height for hero */
+  object-fit: cover;
+  z-index: -1;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px; /* Slimmer nav to match modern style */
+  background: rgba(0, 0, 0, 0.4); /* Semi-transparent */
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.nav-list li {
+  display: inline;
+}
+
+.nav-list a {
+  color: white;
+  text-decoration: none;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shop-icon,
+.profile {
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shop-icon i,
+.profile i {
+  font-size: 1.2rem;
+}
+
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Dark overlay for readability */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 5;
+  max-width: 800px;
+  padding: 0 2rem;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  margin: 0 0 1rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero p {
+  font-size: 1.5rem;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cars-section {
+  background: #111;
+  padding: 4rem 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.cars-section h2 {
+  text-align: center;
+  color: #ff0000; /* Red accent */
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Modern Medium Card Grid */
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Medium base */
+  gap: 1.5rem;
+}
+
+.car-card {
+  background: linear-gradient(
+    145deg,
+    rgba(17, 17, 17, 0.95),
+    rgba(0, 0, 0, 0.8)
+  ); /* Dark gradient for modern depth */
+  border-radius: 16px; /* Rounded modern corners */
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+  border: 1px solid rgba(255, 0, 0, 0.1); /* Red accent border */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  cursor: pointer; /* Clickable hint */
+}
+
+.car-card:hover {
+  transform: translateY(-4px); /* Subtle lift */
+  box-shadow: 0 12px 40px rgba(255, 0, 0, 0.15); /* Red-tinted hover shadow */
+}
+
+.car-card img {
+  width: 100%;
+  height: 200px; /* Fixed height for consistency */
+  object-fit: cover;
+}
+
+.car-card-content {
+  padding: 1.25rem; /* Balanced padding */
+}
+
+.car-card h3 {
+  font-size: 1.1rem; /* Compact title */
+  font-weight: bold;
+  margin: 0 0 0.75rem 0;
+  color: white;
+  line-height: 1.2;
+}
+
+.car-card p {
+  font-size: 0.85rem; /* Clean, small text */
+  margin: 0.25rem 0;
+  color: #ccc;
+  line-height: 1.3;
+}
+
+.order-btn {
+  background: linear-gradient(135deg, #007bff, #0056b3); /* Blue modern gradient */
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  transition:
+    background 0.3s ease,
+    transform 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.order-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #004494);
+  transform: translateY(-1px);
+}
+
+/* Site-wide Modal Styles - Dark Theme Integration */
+.site-modal {
+  background: rgba(17, 17, 17, 0.95); /* Matches cars-section #111 */
+  border: 1px solid #333;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.site-modal .modal-header {
+  border-bottom: 1px solid #333;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px 15px 0 0;
+}
+
+.site-modal .btn-close-white {
+  filter: invert(1);
+}
+
+.site-modal .nav-link {
+  color: white;
+  border: none;
+  background: transparent;
+  border-radius: 10px 10px 0 0;
+}
+
+.site-modal .nav-link.active {
+  background: #ff0000; /* Red accent to match site */
+  color: white;
+}
+
+.site-modal .form-label {
+  color: #fff;
+  font-weight: bold;
+}
+
+.site-modal .form-control,
+.site-modal .form-select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #555;
+  color: white;
+}
+
+.site-modal .form-control::placeholder {
+  color: #aaa;
+}
+
+.site-modal .form-control:focus,
+.site-modal .form-select:focus {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: #ff0000; /* Red accent */
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+}
+
+.site-modal .input-group-text {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #555;
+  color: white;
+}
+
+.site-modal .toggle-password:hover {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+.site-btn-primary {
+  background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); /* Site red theme */
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.site-btn-primary:hover {
+  background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+}
+
+/* About and Contact Sections */
+.about-section,
+.contact-section {
+  padding: 4rem 0;
+  background: #111;
+}
+
+.about-section h2,
+.contact-section h2 {
+  text-align: center;
+  color: #ff0000; /* Red accent */
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.about-section .lead {
+  font-size: 1.2rem;
+  color: #ccc;
+  margin-bottom: 1.5rem;
+}
+
+.about-section ul li {
+  font-size: 1rem;
+  color: #ddd;
+  margin-bottom: 0.5rem;
+}
+
+.about-section img {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.contact-section .text-center i {
+  color: #007bff; /* Blue icons */
+}
+
+.contact-section .bg-dark {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.contact-section .bg-dark:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+#contactForm .form-label {
+  color: #fff;
+  font-weight: 600;
+}
+
+#contactForm .site-input:focus {
+  border-color: #ff0000;
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-section h2,
+  .contact-section h2 {
+    font-size: 2rem;
+  }
+
+  .about-section .row {
+    text-align: center;
+  }
+}
+
+/* Filter UI Styling */
+.filters {
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark */
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 0, 0, 0.2); /* Red accent */
+}
+
+.filters .form-label {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filters .form-select {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  color: white;
+}
+
+.filters .form-select:focus {
+  border-color: #ff0000;
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+}
+
+.filters .btn {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.filters .site-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+}
+
+.filters .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Filters */
+@media (max-width: 768px) {
+  .filters .row {
+    flex-direction: column;
+  }
+
+  .filters .col-md-4 {
+    width: 100%;
+  }
+}
+
+/* My Orders Button and Modal Styling */
+#my-orders-btn {
+  background: linear-gradient(135deg, #007bff, #0056b3); /* Blue gradient for orders */
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); /* Blue shadow */
+}
+
+#my-orders-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #004494); /* Darker blue hover */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* My Orders Modal (Add this modal to HTML if not present) */
+#myOrdersModal .modal-content {
+  background: linear-gradient(145deg, #0a0a0a, #1a1a1a); /* Dark gradient */
+  border: 1px solid rgba(255, 0, 0, 0.15); /* Red accent border */
+  border-radius: 15px;
+  color: white;
+}
+
+#myOrdersModal .modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 123, 255, 0.2); /* Blue line */
+  border-radius: 15px 15px 0 0;
+}
+
+#myOrdersModal .modal-title {
+  color: #007bff; /* Blue title */
+  font-weight: 600;
+}
+
+#myOrdersModal .table {
+  --bs-table-bg: rgba(0, 0, 0, 0.5); /* Dark table bg */
+  --bs-table-color: #e0e0e0; /* Light text */
+}
+
+#myOrdersModal .table th {
+  background: rgba(0, 123, 255, 0.2); /* Blue header */
+  border-color: rgba(255, 0, 0, 0.2); /* Red border */
+  color: #fff;
+  font-weight: 600;
+}
+
+#myOrdersModal .table td {
+  border-color: rgba(255, 0, 0, 0.1); /* Subtle red separators */
+}
+
+#myOrdersModal .btn-primary {
+  background: #007bff;
+  border: none;
+  border-radius: 8px;
+}
+
+#myOrdersModal .btn-primary:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+#myOrdersModal {
+  z-index: 1060 !important; /* Higher than default 1050 and profile's 1060 if stacked */
+}
+
+#myOrdersModal .modal-backdrop {
+  z-index: 1055 !important; /* Backdrop above profile */
+}
+
+/* Optional: Smooth transition when switching modals */
+#myOrdersModal .modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+#myOrdersModal .modal.show .modal-dialog {
+  transform: translate(0, 0);
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  #myOrdersModal .table-responsive {
+    font-size: 0.85rem;
+  }
+}
+
+/* Admin Dashboard Specific Styles */
+#adminDashboardModal .table {
+  --bs-table-bg: rgba(0, 0, 0, 0.3);
+}
+
+#adminDashboardModal .table th {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: #555;
+}
+
+#adminDashboardModal .btn-danger {
+  background: #dc3545;
+  border: none;
+}
+
+#adminDashboardModal .btn-danger:hover {
+  background: #c82333;
+}
+
+#adminDashboardModal .btn-primary {
+  background: #007bff;
+  border: none;
+}
+
+#adminDashboardModal .btn-primary:hover {
+  background: #0056b3;
+}
+
+/* Image Preview */
+#image-preview img,
+#avatar-preview img {
+  border-radius: 10px;
+  border: 1px solid #555;
+}
+
+/* Smooth modal animation */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+  transform: translate(0, 0);
+}
+
+/* Ensure Edit Car Modal appears on top of Dashboard */
+#editCarModal {
+  z-index: 1060 !important; /* Higher than default 1050 */
+}
+
+#editCarModal .modal-backdrop {
+  z-index: 1055 !important; /* Backdrop above dashboard */
+}
+
+/* Allow text and number input for mileage (hybrid: number with step for decimals if needed) */
+#new-car-mileage,
+#edit-car-mileage {
+  type: text; /* Changed from number to allow formatted text like "50,000 km" */
+}
+
+/* Ensure Profile Modal (with Edit Form) appears on top of Dashboard */
+#profileModal {
+  z-index: 1060 !important; /* Higher than default 1050 */
+}
+
+#profileModal .modal-backdrop {
+  z-index: 1055 !important; /* Backdrop above dashboard */
+}
+
+/* Ensure Edit User Modal appears on top of Dashboard */
+#editUserModal {
+  z-index: 1060 !important; /* Higher than default 1050 */
+}
+
+#editUserModal .modal-backdrop {
+  z-index: 1055 !important; /* Backdrop above dashboard */
+}
+
+/* Color Input Styling for Forms */
+#addCarForm input[type='color'],
+#editCarForm input[type='color'] {
+  height: 50px; /* Taller for better picker visibility */
+  border: 2px solid rgba(255, 0, 0, 0.4); /* Red accent border */
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent; /* Transparent bg for color preview */
+  padding: 0;
+}
+
+#addCarForm input[type='color']:focus,
+#editCarForm input[type='color']:focus {
+  border-color: #ff0000; /* Bright red focus */
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+}
+
+/* Hide default color input arrow in some browsers */
+#addCarForm input[type='color']::-webkit-color-swatch-wrapper,
+#editCarForm input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+#addCarForm input[type='color']::-webkit-color-swatch,
+#editCarForm input[type='color']::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+/* Clean Modern Checkout/Order Form - Updated for Fit & Modern Style */
+#cartModal {
+  /* Modern modal backdrop with slight blur */
+  --bs-modal-backdrop-opacity: 0.8;
+}
+
+#cartModal .modal-content {
+  background: linear-gradient(145deg, #0a0a0a, #1a1a1a); /* Deeper dark gradient for modern depth */
+  border: 1px solid rgba(255, 0, 0, 0.15); /* Subtle red border */
+  border-radius: 20px; /* More rounded for modern feel */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); /* Enhanced shadow for elevation */
+}
+
+#cartModal .modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 0, 0, 0.2); /* Red accent line */
+  border-radius: 20px 20px 0 0;
+  padding: 1rem 1.5rem;
+}
+
+#cartModal .modal-title {
+  color: white;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+#cartModal .modal-body {
+  padding: 1.5rem;
+  color: #e0e0e0; /* Lighter text for readability */
+}
+
+#cartModal .order-summary {
+  background: linear-gradient(
+    145deg,
+    rgba(20, 20, 20, 0.95),
+    rgba(40, 40, 40, 0.8)
+  ); /* Subtle inner gradient */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 0, 0, 0.2); /* Lighter red border */
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem; /* Compact text */
+}
+
+#cartModal .order-summary h6 {
+  color: #ff0000; /* Red accent for header */
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 0, 0, 0.3); /* Underline effect */
+  padding-bottom: 0.25rem;
+}
+
+#cartModal ul {
+  max-height: 150px; /* Slightly shorter for clean fit */
+  overflow-y: auto;
+  padding-left: 0.5rem;
+}
+
+#cartModal ul li {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separators */
+}
+
+#cartModal .btn-success {
+  background: linear-gradient(135deg, #28a745, #20c997); /* Vibrant green gradient */
+  border: none;
+  border-radius: 10px; /* Rounded modern button */
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.875rem 1.5rem; /* Balanced padding */
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); /* Green shadow */
+  width: 100%; /* Full width for prominence */
+}
+
+#cartModal .btn-success:hover {
+  background: linear-gradient(135deg, #20c997, #28a745); /* Reverse gradient on hover */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Cart Remove Button Styling */
+#cartModal .btn-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333); /* Red gradient */
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+#cartModal .btn-danger:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+#cartModal .card {
+  background: rgba(0, 0, 0, 0.6); /* Dark card bg */
+  border: 1px solid rgba(255, 0, 0, 0.2); /* Red border */
+  border-radius: 8px;
+  color: white;
+}
+
+#cartModal .card h6 {
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+#cartModal .order-summary {
+  background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(40, 40, 40, 0.8));
+  border-radius: 10px;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  padding: 1rem;
+}
+
+#cartModal .order-summary h6 {
+  color: #ff0000; /* Red header */
+  margin-bottom: 0.5rem;
+}
+
+/* Modern Styling for Order Form Modal */
+#orderFormModal .modal-content {
+  background: linear-gradient(145deg, #0a0a0a, #1a1a1a); /* Deep dark gradient */
+  border: 1px solid rgba(255, 0, 0, 0.15); /* Subtle red border */
+  border-radius: 20px; /* Rounded corners */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); /* Elevated shadow */
+}
+
+#orderFormModal .modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 0, 0, 0.2); /* Red accent line */
+  border-radius: 20px 20px 0 0;
+  padding: 1rem 1.5rem;
+  color: white;
+}
+
+#orderFormModal .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+#orderFormModal .modal-title i {
+  color: #ff0000; /* Red icon */
+}
+
+#orderFormModal .modal-body {
+  padding: 1.5rem;
+  color: #e0e0e0; /* Light text for readability */
+}
+
+#orderFormModal .form-label {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+#orderFormModal .form-control {
+  background: rgba(0, 0, 0, 0.6); /* Dark input bg */
+  border: 1px solid rgba(255, 0, 0, 0.3); /* Red-tinted border */
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: white;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+#orderFormModal .form-control:focus {
+  border-color: #ff0000; /* Bright red focus */
+  box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.2); /* Red glow */
+  background: rgba(0, 0, 0, 0.8); /* Darker on focus */
+}
+
+#orderFormModal .form-control::placeholder {
+  color: #aaa; /* Gray placeholder */
+}
+
+#orderFormModal input[type='file'] {
+  border: 2px dashed rgba(255, 0, 0, 0.4); /* Dashed red for uploads */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent bg */
+}
+
+#orderFormModal input[type='file']:hover {
+  border-color: #ff0000; /* Solid red on hover */
+  background: rgba(255, 0, 0, 0.05); /* Subtle red tint */
+}
+
+#orderFormModal .order-summary {
+  background: linear-gradient(
+    145deg,
+    rgba(20, 20, 20, 0.95),
+    rgba(40, 40, 40, 0.8)
+  ); /* Subtle gradient */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 0, 0, 0.2); /* Lighter red border */
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+#orderFormModal .order-summary h6 {
+  color: #ff0000; /* Red header */
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 0, 0, 0.3); /* Red underline */
+  padding-bottom: 0.25rem;
+}
+
+#orderFormModal .order-summary ul {
+  max-height: 150px;
+  overflow-y: auto;
+  padding-left: 0.5rem;
+}
+
+#orderFormModal .order-summary ul li {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separators */
+}
+
+#orderFormModal .order-summary p.fw-bold {
+  color: #ff0000; /* Red total */
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+#orderFormModal .site-btn-primary {
+  background: linear-gradient(135deg, #28a745, #20c997); /* Green for confirm */
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.875rem 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); /* Green shadow */
+}
+
+#orderFormModal .site-btn-primary:hover {
+  background: linear-gradient(135deg, #20c997, #28a745); /* Reverse gradient */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Responsive for Mobile */
+@media (max-width: 768px) {
+  #orderFormModal .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  #orderFormModal .row > div {
+    margin-bottom: 1rem; /* Stack fields */
+  }
+
+  #orderFormModal .order-summary {
+    font-size: 0.85rem; /* Smaller on mobile */
+  }
+}
+
+/* Tablet (max-width: 992px) - Adjust grid for better fit */
+@media (max-width: 992px) {
+  .car-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Slightly smaller cards */
+    gap: 1rem;
+  }
+
+  .car-card-content {
+    padding: 1rem; /* Reduce padding on tablet */
+  }
+
+  .hero h1 {
+    font-size: 3rem; /* Scale down hero title */
+  }
+
+  .hero p {
+    font-size: 1.3rem;
+  }
+
+  .cars-section h2 {
+    font-size: 2rem; /* Smaller section title */
+  }
+
+  /* Modal adjustments for tablet */
+  .modal-dialog {
+    margin: 1rem; /* Less margin on sides */
+  }
+}
+
+/* Mobile (max-width: 768px) - Single column, compact layout */
+@media (max-width: 768px) {
+  .nav-list {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem; /* Add gaps for wrapped items */
+  }
+
+  .nav-list a,
+  .shop-icon,
+  .profile {
+    padding: 0 0.5rem; /* Reduce padding */
+    font-size: 0.8rem;
+  }
+
+  .hero {
+    height: 80vh; /* Shorter hero on mobile */
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+  }
+
+  .car-grid {
+    grid-template-columns: 1fr; /* Single column */
+    gap: 1rem;
+  }
+
+  .car-card img {
+    height: 180px; /* Shorter image on mobile */
+  }
+
+  .car-card-content {
+    padding: 0.75rem; /* Minimal padding */
+  }
+
+  .car-card h3 {
+    font-size: 1rem;
+  }
+
+  .car-card p {
+    font-size: 0.8rem;
+  }
+
+  .order-btn {
+    padding: 0.625rem;
+    font-size: 0.85rem;
+  }
+
+  .cars-section {
+    padding: 2rem 0; /* Less vertical padding */
+  }
+
+  .cars-section h2 {
+    font-size: 1.75rem;
+  }
+
+  /* Modal responsive - Full screen on mobile */
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+}
+
+/* Small Mobile (max-width: 576px) - Ultra-compact */
+@media (max-width: 576px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .navbar {
+    height: 50px; /* Shorter nav bar */
+  }
+
+  .nav-list a,
+  .shop-icon,
+  .profile {
+    font-size: 0.75rem;
+    padding: 0 0.25rem;
+  }
+
+  .car-card img {
+    height: 160px; /* Even shorter image */
+  }
+
+  .order-btn {
+    font-size: 0.8rem;
+  }
+}
