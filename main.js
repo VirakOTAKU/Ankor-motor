@@ -1368,81 +1368,101 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
   const finalReceiptId = receiptId || `AA-${Date.now()}`;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  // Page background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 210, 297, 'F');
 
-  // Header (unchanged)
-  doc.setFillColor(0, 0, 0);
-  doc.rect(0, 0, 210, 25, 'F');
+  // Header
+  doc.setFillColor(17, 24, 39);
+  doc.rect(0, 0, 210, 28, 'F');
   doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Angkor Auto', 20, 15);
-  doc.setTextColor(255, 0, 0);
-  doc.setFontSize(12);
-  doc.text('Order Confirmation', 20, 22);
+  doc.text('Angkor Auto', 16, 17);
+  doc.setFontSize(11);
+  doc.setTextColor(239, 68, 68);
+  doc.text('Order Confirmation', 16, 24);
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.text(`Receipt ID: ${finalReceiptId}`, 140, 15);
-
-  // Customer Details (unchanged)
-  let y = 35;
-  doc.setFillColor(20, 20, 20);
-  doc.rect(15, y - 5, 180, 35, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Customer Information', 20, y);
-  y += 8;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`Name: ${formData.fullName}`, 20, y);
-  y += 6;
-  doc.text(`Email: ${formData.email}`, 20, y);
-  y += 6;
-  doc.text(`Phone: ${formData.phone}`, 20, y);
-  y += 6;
-  doc.text(`Address: ${formData.address}`, 20, y);
-  y += 6;
-  doc.text(`Receipt ID: ${finalReceiptId}`, 20, y);
-
-  // Items - Fixed y-calc for dynamic height (unchanged)
-  y += 15;
-  const itemHeight = cartItems.length * 7 + 25;
-  doc.setFillColor(20, 20, 20);
-  doc.rect(15, y - 5, 180, itemHeight, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Order Items', 20, y);
-  y += 8;
-  doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  let itemY = y;
-  cartItems.forEach((item, index) => {
-    doc.text(`${index + 1}. ${item.name} (${item.year})`, 20, itemY);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`$${item.price}`, 160, itemY, { align: 'right' });
-    doc.setTextColor(255, 255, 255);
-    itemY += 7;
+  doc.text(`Receipt ID: ${finalReceiptId}`, 150, 12, { align: 'right' });
+  doc.text(`Date: ${new Date().toLocaleString()}`, 150, 20, { align: 'right' });
+
+  // Customer Details
+  let y = 38;
+  doc.setFillColor(243, 244, 246);
+  doc.rect(14, y - 6, 182, 34, 'F');
+  doc.setTextColor(17, 24, 39);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Customer Information', 18, y);
+  y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  doc.text(`Name: ${formData.fullName}`, 18, y);
+  y += 6;
+  doc.text(`Email: ${formData.email}`, 18, y);
+  y += 6;
+  doc.text(`Phone: ${formData.phone}`, 18, y);
+  y += 6;
+  doc.text(`Address: ${formData.address}`, 18, y);
+
+  // Items Table
+  y += 12;
+  const rowHeight = 7;
+  const tableTop = y;
+  const tableWidth = 182;
+  const tableLeft = 14;
+  const tableHeaderHeight = 8;
+  const tableHeight = tableHeaderHeight + cartItems.length * rowHeight + 6;
+
+  doc.setFillColor(243, 244, 246);
+  doc.rect(tableLeft, tableTop, tableWidth, tableHeight, 'F');
+  doc.setDrawColor(229, 231, 235);
+  doc.rect(tableLeft, tableTop, tableWidth, tableHeight);
+
+  doc.setTextColor(17, 24, 39);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.text('Item', tableLeft + 4, tableTop + 6);
+  doc.text('Year', tableLeft + 110, tableTop + 6);
+  doc.text('Price', tableLeft + 172, tableTop + 6, { align: 'right' });
+
+  let itemY = tableTop + tableHeaderHeight;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  cartItems.forEach((item) => {
+    doc.setTextColor(17, 24, 39);
+    doc.text(item.name, tableLeft + 4, itemY + 5);
+    doc.setTextColor(107, 114, 128);
+    doc.text(String(item.year || ''), tableLeft + 110, itemY + 5);
+    doc.setTextColor(17, 24, 39);
+    doc.text(`$${item.price}`, tableLeft + 172, itemY + 5, { align: 'right' });
+    itemY += rowHeight;
   });
-  y = itemY + 5;
 
-  // Total (unchanged)
-  doc.setTextColor(255, 0, 0);
+  y = tableTop + tableHeight + 6;
+
+  // Total
+  doc.setTextColor(17, 24, 39);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text(`Total: $${formData.total}`, 20, y);
-  doc.setLineWidth(1);
-  doc.setDrawColor(255, 0, 0);
-  doc.line(20, y + 2, 190, y + 2);
-  doc.setTextColor(255, 255, 255);
+  doc.text(`Total: $${formData.total}`, tableLeft + 172, y, { align: 'right' });
+  doc.setDrawColor(239, 68, 68);
+  doc.setLineWidth(0.8);
+  doc.line(tableLeft + 110, y + 2, tableLeft + 172, y + 2);
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text(`Receipt ID: ${finalReceiptId}`, 20, y + 8);
+  doc.setTextColor(107, 114, 128);
+  doc.text(`Receipt ID: ${finalReceiptId}`, tableLeft + 4, y + 2);
 
-  // Documents (unchanged setup)
-  y += 20;
-  doc.setFillColor(20, 20, 20);
-  doc.rect(15, y - 5, 180, 60, 'F');
-  doc.setTextColor(255, 255, 255);
+  // Documents
+  y += 14;
+  doc.setFillColor(243, 244, 246);
+  doc.rect(14, y - 6, 182, 60, 'F');
+  doc.setTextColor(17, 24, 39);
   doc.setFont('helvetica', 'bold');
-  doc.text('Uploaded Documents', 20, y);
+  doc.setFontSize(11);
+  doc.text('Uploaded Documents', 18, y);
   y += 8;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
@@ -1498,11 +1518,11 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
       }
 
       // Footer
-      doc.setFillColor(0, 0, 0);
+      doc.setFillColor(17, 24, 39);
       doc.rect(0, 280, 210, 10, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
-      doc.text('Thank you for choosing Angkor Auto! | Phnom Penh, Cambodia', 20, 287);
+      doc.text('Thank you for choosing Angkor Auto! | Phnom Penh, Cambodia', 16, 287);
 
       doc.save(`AngkorAuto-Order-${Date.now()}.pdf`);
       console.log('PDF generated successfully with images.');
