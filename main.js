@@ -159,16 +159,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = document.getElementById('edit-user-username').value;
     const email = document.getElementById('edit-user-email').value;
     const role = document.getElementById('edit-user-role').value;
-    let users = initUsers();
-    const userIndex = users.findIndex((u) => u.username === username);
-    if (userIndex !== -1) {
-      users[userIndex].email = email;
-      users[userIndex].role = role;
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-      renderUsersTable();
-      alert('User updated successfully!');
-    }
+    // Try to update on server first
+    fetch(`/api/users/${encodeURIComponent(username)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, role }),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('Server update failed');
+        return r.json();
+      })
+      .then(() => {
+        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+        renderUsersTable();
+        alert('User updated successfully!');
+      })
+      .catch(() => {
+        // Fallback to localStorage update
+        let users = initUsers();
+        const userIndex = users.findIndex((u) => u.username === username);
+        if (userIndex !== -1) {
+          users[userIndex].email = email;
+          users[userIndex].role = role;
+          localStorage.setItem(USERS_KEY, JSON.stringify(users));
+          bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+          renderUsersTable();
+          alert('User updated locally.');
+        }
+      });
   });
 
   // Edit Car Form Handler - Updated Mileage Parsing
@@ -372,11 +390,14 @@ async function showCarDetail(id) {
 
 // Render Users Table
 function renderUsersTable() {
-  const users = initUsers();
   const tbody = document.getElementById('users-table-body');
-  tbody.innerHTML = users
-    .map(
-      (user) => `
+  // Try to fetch users from server, fallback to localStorage
+  fetch('/api/users')
+    .then((r) => r.json())
+    .then((users) => {
+      tbody.innerHTML = (users || [])
+        .map(
+          (user) => `
     <tr>
       <td>${user.username}</td>
       <td>${user.email || 'N/A'}</td>
@@ -387,17 +408,59 @@ function renderUsersTable() {
       </td>
     </tr>
   `
-    )
-    .join('');
+        )
+        .join('');
+    })
+    .catch(() => {
+      const users = initUsers();
+      tbody.innerHTML = users
+        .map(
+          (user) => `
+    <tr>
+      <td>${user.username}</td>
+      <td>${user.email || 'N/A'}</td>
+      <td><span class="badge bg-${user.role === 'admin' ? 'danger' : 'secondary'}">${user.role}</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" onclick="editUser('${user.username}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.username}')">Delete</button>
+      </td>
+    </tr>
+  `
+        )
+        .join('');
+    });
 }
 
 // Render Messages Table (Admin Dashboard)
 function renderMessagesTable() {
-  const messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
   const tbody = document.getElementById('messages-table-body');
-  tbody.innerHTML = messages
-    .map(
-      (msg, index) => `
+  // Try to fetch messages from server, fallback to localStorage
+  fetch('/api/messages')
+    .then((r) => r.json())
+    .then((messages) => {
+      tbody.innerHTML = (messages || [])
+        .map(
+          (msg) => `
+    <tr>
+      <td>${msg.user}</td>
+      <td>${msg.email}</td>
+      <td>${(msg.message || '').substring(0, 100)}...</td>
+      <td>${msg.date}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id});">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </td>
+    </tr>
+  `
+        )
+        .join('');
+    })
+    .catch(() => {
+      const messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+      tbody.innerHTML = messages
+        .map(
+          (msg, index) => `
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
@@ -410,17 +473,39 @@ function renderMessagesTable() {
       </td>
     </tr>
   `
-    )
-    .join('');
+        )
+        .join('');
+    });
 }
 
 // Delete Message Function (Admin)
-function deleteMessage(index) {
-  if (confirm('Delete this message? This cannot be undone.')) {
+function deleteMessage(idOrIndex) {
+  if (!confirm('Delete this message? This cannot be undone.')) return;
+  // If numeric id (most likely from server), try server delete
+  if (Number.isInteger(idOrIndex) && idOrIndex > 0) {
+    fetch(`/api/messages/${idOrIndex}`, { method: 'DELETE' })
+      .then((r) => {
+        if (!r.ok) throw new Error('Server delete failed');
+        return r.json();
+      })
+      .then(() => {
+        renderMessagesTable();
+        alert('Message deleted successfully!');
+      })
+      .catch(() => {
+        // fallback to localStorage deletion by index if server delete fails
+        let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+        messages.splice(idOrIndex, 1);
+        localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
+        renderMessagesTable();
+        alert('Message deleted locally.');
+      });
+  } else {
+    // treat as local index
     let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
-    messages.splice(index, 1); // Remove from array
-    localStorage.setItem('angkor_auto_messages', JSON.stringify(messages)); // Sync
-    renderMessagesTable(); // Re-render
+    messages.splice(idOrIndex, 1);
+    localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
+    renderMessagesTable();
     alert('Message deleted successfully!');
   }
 }
@@ -435,15 +520,41 @@ function editUser(username) {
     dashboardModal.hide();
   }
 
-  const users = initUsers();
-  const user = users.find((u) => u.username === username);
-  if (user) {
-    document.getElementById('edit-user-username').value = user.username;
-    document.getElementById('edit-user-email').value = user.email || '';
-    document.getElementById('edit-user-role').value = user.role;
-    const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
-    editUserModal.show();
-  }
+  // Try to fetch from server first
+  fetch('/api/users')
+    .then((r) => r.json())
+    .then((users) => {
+      const user = (users || []).find((u) => u.username === username);
+      if (user) {
+        document.getElementById('edit-user-username').value = user.username;
+        document.getElementById('edit-user-email').value = user.email || '';
+        document.getElementById('edit-user-role').value = user.role || 'customer';
+        const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+        editUserModal.show();
+      } else {
+        // fallback to local storage
+        const usersLocal = initUsers();
+        const u = usersLocal.find((x) => x.username === username);
+        if (u) {
+          document.getElementById('edit-user-username').value = u.username;
+          document.getElementById('edit-user-email').value = u.email || '';
+          document.getElementById('edit-user-role').value = u.role || 'customer';
+          const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+          editUserModal.show();
+        }
+      }
+    })
+    .catch(() => {
+      const usersLocal = initUsers();
+      const u = usersLocal.find((x) => x.username === username);
+      if (u) {
+        document.getElementById('edit-user-username').value = u.username;
+        document.getElementById('edit-user-email').value = u.email || '';
+        document.getElementById('edit-user-role').value = u.role || 'customer';
+        const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+        editUserModal.show();
+      }
+    });
 }
 
 // Updated Render Orders Table (Admin Dashboard)
@@ -646,10 +757,24 @@ function deleteUser(username) {
     return;
   }
   if (confirm(`Delete user ${username}?`)) {
-    let users = initUsers();
-    users = users.filter((u) => u.username !== username);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    renderUsersTable();
+    // Try server delete first
+    fetch(`/api/users/${encodeURIComponent(username)}`, { method: 'DELETE' })
+      .then((r) => {
+        if (!r.ok) throw new Error('Server delete failed');
+        return r.json();
+      })
+      .then(() => {
+        renderUsersTable();
+        alert('User deleted successfully.');
+      })
+      .catch(() => {
+        // fallback to localStorage
+        let users = initUsers();
+        users = users.filter((u) => u.username !== username);
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        renderUsersTable();
+        alert('User deleted locally.');
+      });
   }
 }
 
@@ -787,12 +912,44 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
     return;
   }
   const newUser = { username, email, password, role, avatar: null };
-  users.push(newUser);
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  alert('Registration successful! You can now login.');
-  // Switch to login tab
-  const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
-  loginTab.show();
+  // Try to persist to server; fallback to localStorage if server unavailable
+  const registerStatus = document.getElementById('register-status');
+  registerStatus.style.display = 'inline';
+  registerStatus.textContent = 'Saving...';
+  registerStatus.className = 'form-text text-muted mt-2';
+
+  fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newUser)
+  })
+    .then((r) => {
+      if (!r.ok) throw new Error('Server rejected registration');
+      return r.json();
+    })
+    .then(() => {
+      users.push(newUser);
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      registerStatus.textContent = 'Saved to server';
+      registerStatus.className = 'form-text text-success mt-2';
+      renderUsersTable();
+      setTimeout(() => {
+        registerStatus.style.display = 'none';
+      }, 3000);
+      const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+      loginTab.show();
+    })
+    .catch(() => {
+      users.push(newUser);
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      registerStatus.textContent = 'Saved locally (server unavailable)';
+      registerStatus.className = 'form-text text-warning mt-2';
+      setTimeout(() => {
+        registerStatus.style.display = 'none';
+      }, 4000);
+      const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+      loginTab.show();
+    });
 });
 
 // Render Cars (wrapper) — calls async renderer
@@ -1014,20 +1171,47 @@ document.getElementById('contactForm').addEventListener('submit', (e) => {
   const email = document.getElementById('contact-email').value;
   const message = document.getElementById('contact-message').value;
   if (name && email && message) {
-    // Save message to localStorage
     const newMessage = {
-      id: Date.now(),
       user: name,
       email: email,
       message: message,
       date: new Date().toLocaleDateString(),
     };
-    let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
-    messages.push(newMessage);
-    localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
 
-    alert(`Thank you, ${name}! Your message has been sent to admin. We'll reply soon.`);
-    document.getElementById('contactForm').reset();
+    // Try to POST to server; fallback to localStorage if offline
+    const contactStatus = document.getElementById('contact-status');
+    contactStatus.style.display = 'inline';
+    contactStatus.textContent = 'Sending...';
+    contactStatus.className = 'form-text text-muted mt-2';
+
+    fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newMessage)
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('Server error');
+        return r.json();
+      })
+      .then(() => {
+        let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+        messages.push(newMessage);
+        localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
+        contactStatus.textContent = 'Sent to server';
+        contactStatus.className = 'form-text text-success mt-2';
+        renderMessagesTable();
+        setTimeout(() => { contactStatus.style.display = 'none'; }, 3000);
+        document.getElementById('contactForm').reset();
+      })
+      .catch(() => {
+        let messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
+        messages.push(newMessage);
+        localStorage.setItem('angkor_auto_messages', JSON.stringify(messages));
+        contactStatus.textContent = 'Saved locally (server unavailable)';
+        contactStatus.className = 'form-text text-warning mt-2';
+        setTimeout(() => { contactStatus.style.display = 'none'; }, 4000);
+        document.getElementById('contactForm').reset();
+      });
   } else {
     alert('Please fill all fields.');
   }

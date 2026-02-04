@@ -187,6 +187,42 @@ app.post('/api/users', express.json(), (req, res) => {
   stmt.finalize();
 });
 
+// Update a user
+app.put('/api/users/:username', express.json(), (req, res) => {
+  if (!appDb) return res.status(503).json({ error: 'App database not initialized' });
+  const { username } = req.params;
+  const { email, role, password, avatar, newUsername } = req.body;
+  // Allow changing username via newUsername
+  const updates = [];
+  const params = [];
+  if (newUsername) { updates.push('username = ?'); params.push(newUsername); }
+  if (email !== undefined) { updates.push('email = ?'); params.push(email); }
+  if (role !== undefined) { updates.push('role = ?'); params.push(role); }
+  if (password !== undefined) { updates.push('password = ?'); params.push(password); }
+  if (avatar !== undefined) { updates.push('avatar = ?'); params.push(avatar); }
+  if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
+  params.push(username);
+  const sql = `UPDATE users SET ${updates.join(', ')} WHERE username = ?`;
+  const stmt = appDb.prepare(sql);
+  stmt.run(...params, function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, changes: this.changes });
+  });
+  stmt.finalize();
+});
+
+// Delete a user
+app.delete('/api/users/:username', (req, res) => {
+  if (!appDb) return res.status(503).json({ error: 'App database not initialized' });
+  const { username } = req.params;
+  const stmt = appDb.prepare('DELETE FROM users WHERE username = ?');
+  stmt.run(username, function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, deleted: this.changes });
+  });
+  stmt.finalize();
+});
+
 // Messages endpoints (use appDb)
 app.get('/api/messages', (req, res) => {
   if (!appDb) return res.status(503).json({ error: 'App database not initialized' });
@@ -304,6 +340,34 @@ app.delete('/api/cars/:id', (req, res) => {
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', dbReady }));
+
+// Debug endpoint: returns app db info (tables and counts)
+app.get('/debug-app', (req, res) => {
+  if (!appDb) return res.status(503).json({ error: 'App database not initialized' });
+  const info = {};
+  appDb.all("SELECT name, type, sql FROM sqlite_master WHERE type IN ('table','index')", (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    info.schema = rows;
+    appDb.get('SELECT COUNT(*) AS cnt FROM users', (err, r1) => {
+      if (err) return res.status(500).json({ error: err.message });
+      info.usersCount = r1 ? r1.cnt : 0;
+      appDb.get('SELECT COUNT(*) AS cnt FROM messages', (err, r2) => {
+        if (err) return res.status(500).json({ error: err.message });
+        info.messagesCount = r2 ? r2.cnt : 0;
+        // sample rows
+        appDb.all('SELECT username,email,role FROM users LIMIT 20', (err, urows) => {
+          if (err) return res.status(500).json({ error: err.message });
+          info.users = urows;
+          appDb.all('SELECT id,user,email,message,date FROM messages ORDER BY id DESC LIMIT 20', (err, mrows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            info.messages = mrows;
+            res.json(info);
+          });
+        });
+      });
+    });
+  });
+});
 
 // Start server after DB is ready
 initDB()
