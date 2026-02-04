@@ -546,7 +546,7 @@ body {
 /* Allow text and number input for mileage (hybrid: number with step for decimals if needed) */
 #new-car-mileage,
 #edit-car-mileage {
-  type: text; /* Changed from number to allow formatted text like "50,000 km" */
+  types: text; /* Changed from number to allow formatted text like "50,000 km" */
 }
 
 /* Ensure Profile Modal (with Edit Form) appears on top of Dashboard */

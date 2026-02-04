@@ -1106,7 +1106,7 @@ function renderCart() {
             <h6>${item.name} (${item.year})</h6>
             <p class="mb-0 text-muted">$${item.price}</p>
           </div>
-          <button class="btn btn-danger btn-sm ms-2" onclick="removeFromCart(${index})">
+          <button type="button" class="btn btn-danger btn-sm ms-2" data-remove-index="${index}">
             <i class="bi bi-trash"></i> Remove
           </button>
         </div>
@@ -1141,6 +1141,20 @@ function removeFromCart(index) {
     alert('Error removing item. Please try again.');
   }
 }
+
+function initCartEvents() {
+  const items = document.getElementById('cart-items');
+  if (!items) return;
+  items.addEventListener('click', (e) => {
+    const button = e.target.closest('[data-remove-index]');
+    if (!button) return;
+    const index = parseInt(button.dataset.removeIndex, 10);
+    if (Number.isNaN(index)) return;
+    removeFromCart(index);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initCartEvents);
 
 document.querySelector('.shop-icon').addEventListener('click', () => {
   renderCart();
