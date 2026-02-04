@@ -1365,6 +1365,7 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
     alert('jsPDF library not loaded. Check CDN in HTML.');
     return;
   }
+  const finalReceiptId = receiptId || `AA-${Date.now()}`;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -1378,11 +1379,9 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
   doc.setTextColor(255, 0, 0);
   doc.setFontSize(12);
   doc.text('Order Confirmation', 20, 22);
-  if (receiptId) {
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(10);
-    doc.text(`Receipt ID: ${receiptId}`, 140, 15);
-  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text(`Receipt ID: ${finalReceiptId}`, 140, 15);
 
   // Customer Details (unchanged)
   let y = 35;
@@ -1402,9 +1401,7 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
   y += 6;
   doc.text(`Address: ${formData.address}`, 20, y);
   y += 6;
-  if (receiptId) {
-    doc.text(`Receipt ID: ${receiptId}`, 20, y);
-  }
+  doc.text(`Receipt ID: ${finalReceiptId}`, 20, y);
 
   // Items - Fixed y-calc for dynamic height (unchanged)
   y += 15;
@@ -1435,6 +1432,9 @@ async function generateOrderPDF(formData, user, cartItems, receiptId) {
   doc.setLineWidth(1);
   doc.setDrawColor(255, 0, 0);
   doc.line(20, y + 2, 190, y + 2);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.text(`Receipt ID: ${finalReceiptId}`, 20, y + 8);
 
   // Documents (unchanged setup)
   y += 20;
