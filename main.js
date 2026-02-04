@@ -1288,8 +1288,9 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     return;
   }
   if (validateOrderForm(formData)) {
+    const receiptId = `AA-${Date.now()}`;
     console.log('Generating PDF...');
-    await generateOrderPDF(formData, currentUser, cart); // Added await
+    await generateOrderPDF(formData, currentUser, cart, receiptId); // Added await
     // Save order (non-file data)
     const cardLast4 = formData.cardNumber ? formData.cardNumber.slice(-4) : '';
     const paymentSummary =
@@ -1300,6 +1301,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
         : 'Cash on delivery';
 
     const order = {
+      receiptId,
       user: currentUser.username,
       car: cart.map((c) => c.name).join(', '),
       total: formData.total,
@@ -1308,7 +1310,7 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     };
     orders.push(order);
     localStorage.setItem('angkor_auto_orders', JSON.stringify(orders));
-    alert('Order confirmed! PDF generated.');
+    alert(`Order confirmed! Receipt ID: ${receiptId}`);
     cart = [];
     document.getElementById('cart-count').textContent = 0;
     bootstrap.Modal.getInstance(document.getElementById('orderFormModal')).hide();
@@ -1358,7 +1360,7 @@ function validateOrderForm(data) {
 }
 
 // Generate PDF - Fixed Async Handling with Await
-async function generateOrderPDF(formData, user, cartItems) {
+async function generateOrderPDF(formData, user, cartItems, receiptId) {
   if (typeof window.jspdf === 'undefined') {
     alert('jsPDF library not loaded. Check CDN in HTML.');
     return;
@@ -1376,6 +1378,11 @@ async function generateOrderPDF(formData, user, cartItems) {
   doc.setTextColor(255, 0, 0);
   doc.setFontSize(12);
   doc.text('Order Confirmation', 20, 22);
+  if (receiptId) {
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.text(`Receipt ID: ${receiptId}`, 140, 15);
+  }
 
   // Customer Details (unchanged)
   let y = 35;
@@ -1394,6 +1401,10 @@ async function generateOrderPDF(formData, user, cartItems) {
   doc.text(`Phone: ${formData.phone}`, 20, y);
   y += 6;
   doc.text(`Address: ${formData.address}`, 20, y);
+  y += 6;
+  if (receiptId) {
+    doc.text(`Receipt ID: ${receiptId}`, 20, y);
+  }
 
   // Items - Fixed y-calc for dynamic height (unchanged)
   y += 15;
