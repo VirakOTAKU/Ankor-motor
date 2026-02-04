@@ -179,14 +179,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const brand = document.getElementById('edit-car-brand').value;
     const model = document.getElementById('edit-car-model').value;
     const category = document.getElementById('edit-car-category').value;
-    const year = parseInt(document.getElementById('edit-car-year').value);
+    const yearVal = document.getElementById('edit-car-year').value;
+    const year = yearVal ? parseInt(yearVal) : 0;
     const bodyType = document.getElementById('edit-car-body-type').value;
     const transmission = document.getElementById('edit-car-transmission').value;
     const condition = document.getElementById('edit-car-condition').value;
     const mileageText = document.getElementById('edit-car-mileage').value.replace(/,/g, '');
-    const mileage = parseInt(mileageText) || 0;
+    const mileage = mileageText ? parseInt(mileageText) : 0;
     const color = document.getElementById('edit-car-color').value || 'Not specified';
-    const price = parseInt(document.getElementById('edit-car-price').value);
+    const priceVal = document.getElementById('edit-car-price').value;
+    const price = priceVal ? parseInt(priceVal) : 0;
     const description = document.getElementById('edit-car-description').value;
     const imageFile = document.getElementById('edit-car-image').files[0];
     const imageUrl = document.getElementById('edit-car-image-url').value;
@@ -671,20 +673,23 @@ function addCar() {
   const brand = document.getElementById('new-car-brand').value;
   const model = document.getElementById('new-car-model').value;
   const category = document.getElementById('new-car-category').value;
-  const year = parseInt(document.getElementById('new-car-year').value);
+  const yearVal = document.getElementById('new-car-year').value;
+  const year = yearVal ? parseInt(yearVal) : 0;
   const bodyType = document.getElementById('new-car-body-type').value;
   const transmission = document.getElementById('new-car-transmission').value;
   const condition = document.getElementById('new-car-condition').value;
   const mileageText = document.getElementById('new-car-mileage').value.replace(/,/g, '');
-  const mileage = parseInt(mileageText) || 0;
+  const mileage = mileageText ? parseInt(mileageText) : 0;
   const color = document.getElementById('new-car-color').value || 'Not specified';
-  const price = parseInt(document.getElementById('new-car-price').value);
+  const priceVal = document.getElementById('new-car-price').value;
+  const price = priceVal ? parseInt(priceVal) : 0;
   const description = document.getElementById('new-car-description').value;
   const imageFile = document.getElementById('new-car-image').files[0];
   const imageUrl = document.getElementById('new-car-image-url').value;
   
-  if (!name || !brand || !model || !category || !year || !bodyType || !transmission || !condition || !mileage || !price || !description) {
-    alert('Please fill all required fields.');
+  // Validate required text fields only
+  if (!name || !brand || !model || !category || !bodyType || !transmission || !condition || !description) {
+    alert('Please fill all required fields (Name, Brand, Model, Category, Body Type, Transmission, Condition, Description).');
     return;
   }
   
