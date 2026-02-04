@@ -1312,7 +1312,9 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
     localStorage.setItem('angkor_auto_orders', JSON.stringify(orders));
     alert(`Order confirmed! Receipt ID: ${receiptId}`);
     cart = [];
+    localStorage.setItem('angkor_auto_cart', JSON.stringify(cart));
     document.getElementById('cart-count').textContent = 0;
+    renderCart();
     bootstrap.Modal.getInstance(document.getElementById('orderFormModal')).hide();
     document.getElementById('orderForm').reset();
   }
