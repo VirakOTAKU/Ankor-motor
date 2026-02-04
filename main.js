@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const condition = document.getElementById('edit-car-condition').value;
     const mileageText = document.getElementById('edit-car-mileage').value.replace(/,/g, '');
     const mileage = parseInt(mileageText) || 0;
-    const color = document.getElementById('edit-car-color').value;
+    const color = document.getElementById('edit-car-color').value || 'Not specified';
     const price = parseInt(document.getElementById('edit-car-price').value);
     const description = document.getElementById('edit-car-description').value;
     const imageFile = document.getElementById('edit-car-image').files[0];
@@ -677,13 +677,13 @@ function addCar() {
   const condition = document.getElementById('new-car-condition').value;
   const mileageText = document.getElementById('new-car-mileage').value.replace(/,/g, '');
   const mileage = parseInt(mileageText) || 0;
-  const color = document.getElementById('new-car-color').value;
+  const color = document.getElementById('new-car-color').value || 'Not specified';
   const price = parseInt(document.getElementById('new-car-price').value);
   const description = document.getElementById('new-car-description').value;
   const imageFile = document.getElementById('new-car-image').files[0];
   const imageUrl = document.getElementById('new-car-image-url').value;
   
-  if (!name || !brand || !model || !category || !year || !bodyType || !transmission || !condition || !mileage || !color || !price || !description) {
+  if (!name || !brand || !model || !category || !year || !bodyType || !transmission || !condition || !mileage || !price || !description) {
     alert('Please fill all required fields.');
     return;
   }
