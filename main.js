@@ -440,13 +440,16 @@ function renderMessagesTable() {
     .then((messages) => {
       tbody.innerHTML = (messages || [])
         .map(
-          (msg) => `
+          (msg, index) => `
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><a href="#" class="text-decoration-none view-message-link" data-message="${(msg.message || '').replace(/"/g, '&quot;')}" data-sender="${msg.user}" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
+      <td><span class="text-muted">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
+        <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-id="${msg.id}" data-source="server">
+          <i class="bi bi-eye"></i> View
+        </button>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id});">
           <i class="bi bi-trash"></i> Delete
         </button>
@@ -455,7 +458,7 @@ function renderMessagesTable() {
   `
         )
         .join('');
-      attachMessageLinkListeners();
+      attachViewMessageListeners(messages, 'server');
     })
     .catch(() => {
       const messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
@@ -465,9 +468,12 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><a href="#" class="text-decoration-none view-message-link" data-message="${(msg.message || '').replace(/"/g, '&quot;')}" data-sender="${msg.user}" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
+      <td><span class="text-muted">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
+        <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-index="${index}" data-source="local">
+          <i class="bi bi-eye"></i> View
+        </button>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${index});">
           <i class="bi bi-trash"></i> Delete
         </button>
@@ -476,18 +482,36 @@ function renderMessagesTable() {
   `
         )
         .join('');
-      attachMessageLinkListeners();
+      attachViewMessageListeners(messages, 'local');
     });
 }
 
-// Attach event listeners to message links
-function attachMessageLinkListeners() {
-  document.querySelectorAll('.view-message-link').forEach(link => {
-    link.addEventListener('click', (e) => {
+// Attach event listeners to view message buttons
+function attachViewMessageListeners(messages, source) {
+  document.querySelectorAll('.view-message-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const message = link.getAttribute('data-message');
-      const sender = link.getAttribute('data-sender');
-      viewFullMessage(message, sender);
+      let message, sender;
+      
+      if (source === 'server') {
+        const messageId = btn.getAttribute('data-message-id');
+        const msg = messages.find(m => m.id == messageId);
+        if (msg) {
+          message = msg.message;
+          sender = msg.user;
+        }
+      } else {
+        const messageIndex = btn.getAttribute('data-message-index');
+        const msg = messages[messageIndex];
+        if (msg) {
+          message = msg.message;
+          sender = msg.user;
+        }
+      }
+      
+      if (message && sender) {
+        viewFullMessage(message, sender);
+      }
     });
   });
 }
