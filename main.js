@@ -873,6 +873,7 @@ function deleteCar(id) {
       .then(data => {
         renderCarsTable();
         renderCars();
+        renderCarsCrudTable();
         alert('Car deleted successfully!');
       })
       .catch(err => {
