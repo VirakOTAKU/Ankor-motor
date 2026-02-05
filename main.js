@@ -444,7 +444,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><span class="text-dark" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
+      <td><span class="text-light" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-id="${msg.id}" data-source="server">
@@ -468,7 +468,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><span class="text-dark" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
+      <td><span class="text-light" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-index="${index}" data-source="local">
