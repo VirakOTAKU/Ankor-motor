@@ -444,7 +444,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td>${(msg.message || '').substring(0, 100)}...</td>
+      <td><a href="#" class="text-decoration-none" onclick="viewFullMessage('${(msg.message || '').replace(/'/g, "\\'")}', '${msg.user}'); return false;" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id});">
@@ -464,7 +464,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td>${msg.message.substring(0, 100)}...</td>
+      <td><a href="#" class="text-decoration-none" onclick="viewFullMessage('${(msg.message || '').replace(/'/g, "\\'")}', '${msg.user}'); return false;" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${index});">
@@ -476,6 +476,36 @@ function renderMessagesTable() {
         )
         .join('');
     });
+}
+
+// View Full Message Function
+function viewFullMessage(message, sender) {
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
+  modal.id = 'viewMessageModal';
+  modal.tabIndex = '-1';
+  modal.innerHTML = `
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Full Message from ${sender}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>${message}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const bsModal = new bootstrap.Modal(modal);
+  bsModal.show();
+  modal.addEventListener('hidden.bs.modal', () => {
+    modal.remove();
+  });
 }
 
 // Delete Message Function (Admin)
