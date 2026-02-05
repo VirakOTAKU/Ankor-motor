@@ -1002,19 +1002,34 @@ function clearFilters() {
   document.getElementById('filter-category').value = '';
   document.getElementById('filter-brand').value = '';
   currentFilters = { category: '', brand: '' };
-  renderFilteredCars();
+  renderCars();
 }
 
-// Render Filtered Cars
-function renderFilteredCars() {
-  const savedCars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
-  let filteredCars = savedCars.filter((car) => {
+// Render Filtered Cars — fetch from API with localStorage fallback
+async function renderFilteredCars() {
+  const grid = document.getElementById('car-grid');
+  let cars = [];
+  
+  // Fetch from API first, fallback to localStorage
+  try {
+    const resp = await fetch('/api/cars');
+    if (resp.ok) {
+      cars = await resp.json();
+    } else {
+      throw new Error('API not available');
+    }
+  } catch (e) {
+    cars = JSON.parse(localStorage.getItem(CARS_KEY)) || [];
+  }
+  
+  // Apply filters
+  let filteredCars = cars.filter((car) => {
     const matchesCategory = !currentFilters.category || car.category === currentFilters.category;
     const matchesBrand =
-      !currentFilters.brand || car.name.toLowerCase().includes(currentFilters.brand.toLowerCase());
+      !currentFilters.brand || car.brand.toLowerCase().includes(currentFilters.brand.toLowerCase());
     return matchesCategory && matchesBrand;
   });
-  const grid = document.getElementById('car-grid');
+  
   if (filteredCars.length === 0) {
     grid.innerHTML =
       '<p class="text-center text-muted col-12">No cars match the selected filters. Try adjusting your search.</p>';
@@ -1022,24 +1037,20 @@ function renderFilteredCars() {
     grid.innerHTML = filteredCars
       .map(
         (car) => `
-      <div class="car-card" onclick="showCarDetail(${car.id})">
-        <img src="${car.image}" alt="${car.name}">
+      <div class="car-card" onclick="showCarDetail(${car.id}); return false;">
+        <img src="${car.image || 'images/placeholder.png'}" alt="${car.name}">
         <div class="car-card-content">
           <h3>${car.year} ${car.name}</h3>
-          <p>Condition: ${car.condition}</p>
-          <p>Mileage: ${car.mileage} km</p>
-          <p>Color: ${car.color}</p>
-          <p>Price: $${car.price}</p>
-          <button class="order-btn w-100" onclick="showCarDetail(${car.id}); event.stopPropagation();">Order</button>
+          <p>Condition: ${car.condition || 'N/A'}</p>
+          <p>Mileage: ${car.mileage || 0} km</p>
+          <p>Color: ${car.color || 'N/A'}</p>
+          <p>Price: $${car.price || '0'}</p>
+          <button class="order-btn w-100" onclick="handleOrder(${car.id}); event.stopPropagation(); return false;">Order</button>
         </div>
       </div>
     `
       )
       .join('');
-  }
-  // Update initial render to use filtered
-  if (Object.values(currentFilters).every((f) => !f)) {
-    renderCars(); // Full render if no filters
   }
 }
 
