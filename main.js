@@ -444,7 +444,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><a href="#" class="text-decoration-none" onclick="viewFullMessage('${(msg.message || '').replace(/'/g, "\\'")}', '${msg.user}'); return false;" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
+      <td><a href="#" class="text-decoration-none view-message-link" data-message="${(msg.message || '').replace(/"/g, '&quot;')}" data-sender="${msg.user}" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id});">
@@ -455,6 +455,7 @@ function renderMessagesTable() {
   `
         )
         .join('');
+      attachMessageLinkListeners();
     })
     .catch(() => {
       const messages = JSON.parse(localStorage.getItem('angkor_auto_messages')) || [];
@@ -464,7 +465,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><a href="#" class="text-decoration-none" onclick="viewFullMessage('${(msg.message || '').replace(/'/g, "\\'")}', '${msg.user}'); return false;" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
+      <td><a href="#" class="text-decoration-none view-message-link" data-message="${(msg.message || '').replace(/"/g, '&quot;')}" data-sender="${msg.user}" title="Click to view full message">${(msg.message || '').substring(0, 50)}...</a></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-danger" onclick="deleteMessage(${index});">
@@ -475,7 +476,20 @@ function renderMessagesTable() {
   `
         )
         .join('');
+      attachMessageLinkListeners();
     });
+}
+
+// Attach event listeners to message links
+function attachMessageLinkListeners() {
+  document.querySelectorAll('.view-message-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const message = link.getAttribute('data-message');
+      const sender = link.getAttribute('data-sender');
+      viewFullMessage(message, sender);
+    });
+  });
 }
 
 // View Full Message Function
