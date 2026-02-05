@@ -444,7 +444,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><span class="text-muted">${(msg.message || '').substring(0, 50)}...</span></td>
+      <td><span class="text-dark" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-id="${msg.id}" data-source="server">
@@ -468,7 +468,7 @@ function renderMessagesTable() {
     <tr>
       <td>${msg.user}</td>
       <td>${msg.email}</td>
-      <td><span class="text-muted">${(msg.message || '').substring(0, 50)}...</span></td>
+      <td><span class="text-dark" style="font-weight: 500;">${(msg.message || '').substring(0, 50)}...</span></td>
       <td>${msg.date}</td>
       <td>
         <button class="btn btn-sm btn-info me-2 view-message-btn" data-message-index="${index}" data-source="local">
@@ -530,8 +530,8 @@ function viewFullMessage(message, sender) {
           <h5 class="modal-title">Full Message from ${sender}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" style="min-height: 200px;">
-          <div id="message-content"></div>
+        <div class="modal-body" style="min-height: 200px; background-color: #f8f9fa;">
+          <div id="message-content" style="color: #000;"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
