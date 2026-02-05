@@ -484,6 +484,7 @@ function viewFullMessage(message, sender) {
   modal.className = 'modal fade';
   modal.id = 'viewMessageModal';
   modal.tabIndex = '-1';
+  modal.setAttribute('role', 'dialog');
   modal.innerHTML = `
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -491,8 +492,8 @@ function viewFullMessage(message, sender) {
           <h5 class="modal-title">Full Message from ${sender}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <p>${message}</p>
+        <div class="modal-body" style="min-height: 200px;">
+          <div id="message-content"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -501,6 +502,12 @@ function viewFullMessage(message, sender) {
     </div>
   `;
   document.body.appendChild(modal);
+  // Set message content using textContent to avoid HTML injection issues
+  const messageContent = modal.querySelector('#message-content');
+  messageContent.textContent = message;
+  messageContent.style.whiteSpace = 'pre-wrap';
+  messageContent.style.wordWrap = 'break-word';
+  
   const bsModal = new bootstrap.Modal(modal);
   bsModal.show();
   modal.addEventListener('hidden.bs.modal', () => {
